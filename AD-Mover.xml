@@ -1,6 +1,65 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
 <sailpoint>
-    <Workflow  explicitTransitions="true"  libraries="Identity" name="Name goes here...">
-    </Workflow>
+
+  <!-- Template para los emails automaticos -->
+  <EmailTemplate name="Manager_Transfer">
+    <Body>
+      The following user: $identityName has had a change in manager.
+      Old Manager: $oldManagerName
+      New Manager: $newManagerName
+    </Body>
+    <Subject>Manager transfer completed for: $identityName</Subject>
+  </EmailTemplate>
+
+  <EmailTemplate name="Department_Transfer">
+    <Body>
+      The following user: $identityName has had a change in department.
+      Previous department: $oldDepartmentName
+      New Department: $newDepartmentName
+    </Body>
+    <Subject>Department transfer completed for: $identityName</Subject>
+  </EmailTemplate>
+
+  <EmailTemplate name="StatusChange">
+    <Body>
+      The following user: $identityName has had a change in employment status.
+
+      $reason
+
+    </Body>
+    <Subject>Status transfer completed for: $identityName</Subject>
+  </EmailTemplate>
+
+  <!--QuickLink-->
+  <ImportAction name="merge">
+    <Configuration name="SystemConfiguration">
+      <Attributes>
+        <Map>
+          <entry key='quickLinkCategories'>
+            <value>
+              <List>
+                <QuickLinkCategory name="Custom" messageKey="quicklink_category_custom" enabled="true" icon="quickLinkCategoryCustom"/>
+              </List>
+            </value>
+          </entry>
+          <entry key="helpDeskQuickLinks">
+            <value>
+              <List>
+                <QuickLink name="Mover" action="workflow" category="Custom" messageKey="Mover Workflow">
+                  <Attributes>
+                    <Map>
+                      <entry key="workflowName" value="Mover"/>
+                      <entry key="workflowSuccess" value="Starting request..."/>
+                      <entry key="launcher"/>
+                    </Map>
+                  </Attributes>
+                </QuickLink>
+              </List>
+            </value>
+          </entry>
+        </Map>
+      </Attributes>
+    </Configuration>
+  </ImportAction>
 </sailpoint>
