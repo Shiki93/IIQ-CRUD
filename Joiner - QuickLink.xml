@@ -1,0 +1,11 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE QuickLink PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<QuickLink action="workflow" category="Custom" messageKey="Joiner Workflow" name="Joiner">
+  <Attributes>
+    <Map>
+      <entry key="launcher"/>
+      <entry key="workflowName" value="Joiner"/>
+      <entry key="workflowSuccess" value="Starting request..."/>
+    </Map>
+  </Attributes>
+</QuickLink>
