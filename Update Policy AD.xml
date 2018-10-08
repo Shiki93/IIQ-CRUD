@@ -1,0 +1,44 @@
+    <Form name="UpdateAD" objectType="account" type="Update">
+      <Field displayName="con_prov_policy_ad_objecttype" name="ObjectType" required="true" section="Account" type="string" value="User"/>
+      <Field displayName="con_prov_policy_ad_distinguishedName" helpKey="help_con_prov_policy_ad_distinguishedName" name="distinguishedName" required="true" section="Account" type="string"/>
+      <Field displayName="con_prov_policy_ad_sAMAccountName" helpKey="help_con_prov_policy_ad_sAMAccountName" name="sAMAccountName" required="true" section="Account" type="string"/>
+      <Field displayName="con_prov_policy_ad_password" helpKey="help_con_prov_policy_ad_password" name="password" required="true" section="Account" type="secret"/>
+      <Field displayName="con_prov_policy_ad_pwdLastSet" helpKey="help_con_prov_policy_ad_pwdLastSet" name="pwdLastSet" reviewRequired="true" section="Account" type="boolean"/>
+      <Field displayName="con_prov_policy_ad_IIQDisabled" helpKey="help_con_prov_policy_ad_IIQDisabled" name="IIQDisabled" reviewRequired="true" section="Account" type="boolean" value="false"/>
+      <Field displayName="con_prov_policy_ad_primaryGroupDN" helpKey="help_con_prov_policy_ad_primaryGroupDN" name="primaryGroupDN" reviewRequired="true" section="Account" type="string"/>
+      <Field displayName="con_prov_policy_ad_givenName" helpKey="help_con_prov_policy_ad_givenName" name="givenName" reviewRequired="true" section="General" type="string"/>
+      <Field displayName="con_prov_policy_ad_sn" helpKey="help_con_prov_policy_ad_sn" name="sn" reviewRequired="true" section="General" type="string"/>
+      <Field displayName="con_prov_policy_ad_description" helpKey="help_con_prov_policy_ad_description" name="description" reviewRequired="true" section="General" type="string"/>
+      <Field displayName="con_prov_policy_ad_msNPAllowDialin" helpKey="help_con_prov_policy_ad_msNPAllowDialin" name="msNPAllowDialin" reviewRequired="true" section="Dial-in" type="string" value="Not Set">
+        <AllowedValuesDefinition>
+          <Value>
+            <List>
+              <String>Not Set</String>
+              <String>true</String>
+              <String>false</String>
+            </List>
+          </Value>
+        </AllowedValuesDefinition>
+      </Field>
+      <Field displayName="con_prov_policy_ad_msNPCallingStationID" helpKey="help_con_prov_policy_ad_msNPCallingStationID" multi="true" name="msNPCallingStationID" reviewRequired="true" section="Dial-in" type="string"/>
+      <Field displayName="con_prov_policy_ad_msRADIUSCallbackNumber" helpKey="help_con_prov_policy_ad_msRADIUSCallbackNumber" name="msRADIUSCallbackNumber" reviewRequired="true" section="Dial-in" type="string"/>
+      <Field displayName="con_prov_policy_ad_msRADIUSFramedRoute" helpKey="help_con_prov_policy_ad_msRADIUSFramedRoute" multi="true" name="msRADIUSFramedRoute" reviewRequired="true" section="Dial-in" type="string"/>
+      <Field displayName="con_prov_policy_ad_msRADIUSFramedIPAddress" helpKey="help_con_prov_policy_ad_msRADIUSFramedIPAddress" name="msRADIUSFramedIPAddress" reviewRequired="true" section="Dial-in" type="string"/>
+      <Field displayName="con_prov_policy_ad_homeMDB" helpKey="help_con_prov_policy_ad_homeMDB" name="homeMDB" reviewRequired="true" section="Exchange" type="string"/>
+      <Field displayName="con_prov_policy_ad_mailNickname" helpKey="help_con_prov_policy_ad_mailNickname" name="mailNickname" reviewRequired="true" section="Exchange" type="string"/>
+      <Field displayName="con_prov_policy_ad_msExchHideFromAddressLists" helpKey="help_con_prov_policy_ad_msExchHideFromAddressLists" name="msExchHideFromAddressLists" reviewRequired="true" section="Exchange" type="boolean"/>
+      <Field displayName="con_prov_policy_ad_SipAddress" helpKey="help_con_prov_policy_ad_SipAddress" name="SipAddress" reviewRequired="true" section="Lync" type="string"/>
+      <Field displayName="con_prov_policy_ad_SipDomain" helpKey="help_con_prov_policy_ad_SipDomain" name="SipDomain" reviewRequired="true" section="Lync" type="string"/>
+      <Field displayName="con_prov_policy_ad_SipAddressType" helpKey="help_con_prov_policy_ad_SipAddressType" name="SipAddressType" reviewRequired="true" section="Lync" type="string">
+        <AllowedValuesDefinition>
+          <Value>
+            <List>
+              <String>SamAccountName</String>
+              <String>FirstLastName</String>
+              <String>EmailAddress</String>
+            </List>
+          </Value>
+        </AllowedValuesDefinition>
+      </Field>
+      <Field displayName="con_prov_policy_ad_RegistrarPool" helpKey="help_con_prov_policy_ad_RegistrarPool" name="RegistrarPool" reviewRequired="true" section="Lync" type="string"/>
+    </Form>
