@@ -39,14 +39,14 @@
           <entry key='quickLinkCategories'>
             <value>
               <List>
-                <QuickLinkCategory name="Manager" messageKey="quicklink_category_manager" enabled="true" icon="quickLinkCategoryManager"/>
+                <QuickLinkCategory name="Custom" messageKey="quicklink_category_custom" enabled="true" icon="quickLinkCategoryCustom"/>
               </List>
             </value>
           </entry>
           <entry key="managerQuickLinks">
             <value>
               <List>
-                <QuickLink name="Mover" action="workflow" category="Manager" messageKey="ManagerTransfer">
+                <QuickLink name="Mover" action="workflow" category="Custom" messageKey="ManagerTransfer">
                   <Attributes>
                     <Map>
                       <entry key="workflowName" value="ManagerTransfer"/>
