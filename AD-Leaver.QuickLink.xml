@@ -1,0 +1,39 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE QuickLink PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<QuickLink name="Wizard-Terminate" action="workflow" enabled="true" messageKey="User Terminate" category="Custom">
+                  <Attributes>
+                    <Map>
+                      <entry key="workflowName" value="Prov-TerminateUser" />
+                      <entry key="workflowSuccess" value="Termination process started..." />
+                      <entry key="manager">
+                        <value>
+                          <Script>
+                            <Source>
+                              if(currentUser.getManager() == null){
+                                return "spadmin";
+                              }
+                              else{
+                                return currentUser.getManager().getName();
+                              }
+                            </Source>
+                          </Script>
+                        </value>
+                      </entry>
+
+                      <entry key="managerEmail">
+                        <value>
+                          <Script>
+                            <Source>
+                              if(currentUser.getManager() == null){
+                                return "spadmin@example.com";
+                              }
+                              else{
+                                return currentUser.getManager().getEmail();
+                              }
+                            </Source>
+                          </Script>
+                        </value>
+                      </entry>
+                    </Map>
+                  </Attributes>
+                </QuickLink>

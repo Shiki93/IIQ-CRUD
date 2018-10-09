@@ -1,0 +1,11 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE QuickLink PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<QuickLink name="Mover" action="workflow" category="Custom" messageKey="ManagerTransfer">
+  <Attributes>
+    <Map>
+      <entry key="workflowName" value="ManagerTransfer"/>
+      <entry key="workflowSuccess" value="Starting request..."/>
+      <entry key="launcher"/>
+    </Map>
+  </Attributes>
+</QuickLink>
