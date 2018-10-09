@@ -46,10 +46,10 @@
           <entry key="managerQuickLinks">
             <value>
               <List>
-                <QuickLink name="Mover" action="workflow" category="Custom" messageKey="Mover Workflow">
+                <QuickLink name="Mover" action="workflow" category="Manager" messageKey="ManagerTransfer">
                   <Attributes>
                     <Map>
-                      <entry key="workflowName" value="Mover"/>
+                      <entry key="workflowName" value="ManagerTransfer"/>
                       <entry key="workflowSuccess" value="Starting request..."/>
                       <entry key="launcher"/>
                     </Map>
@@ -62,4 +62,48 @@
       </Attributes>
     </Configuration>
   </ImportAction>
+
+  <Workflow  explicitTransitions="true" libraries="Identity" name="ManagerTransfer" type="IdentityLifecycle">
+    <Variable input="true" name="trigger"/>
+    <Variable input="true" name="event" transient="true"/>
+    <Variable input="true" name="identityName"/>
+
+    <Variable name="oldManagerEmail"/>
+    <Variable name="oldManagerName"/>
+    <Variable name="newManagerEmail"/>
+    <Variable name="newManagerName"/>
+
+    <Step icon="Start" name="Start">
+      <Transition to="Process user"/>
+    </Step>
+    <Step icon="Message" name="Process user">
+      <Script>
+        <Source>
+          import sailpoint.object.*;
+
+          String identityFullname = event.getIdentityFullName();
+          Identity oldManager = (null != event.getOldObject()) ? event.getOldObject().getManager() : null;
+          Identity newManager = (null != event.getObject()) ? event.getObject().getManager() : null;
+          String oldManagerName = (null != oldManager) ? oldManager.getDisplayableName() : null;
+          String oldManagerEmail = (null != oldManager) ? oldManager.getEmail() : null;
+          String newManagerName = (null != newManager) ? newManager.getDisplayableName() : null;
+          String newManagerEmail= (null != newManager) ? newManager.getEmail() : null;
+          wfcontext.setVariable("oldManagerName",oldManagerName); 
+          wfcontext.setVariable("oldManagerEmail",oldManagerEmail);
+          wfcontext.setVariable("newManagerName",newManagerName);
+          wfcontext.setVariable("newManagerEmail",newManagerEmail);
+
+          System.out.println(identityFullname + " changed managers from " + oldManagerName + " to " + newManagerName);
+        </Source>
+      </Script>
+      <Transition to="NotifyManagers"/>
+    </Step>
+    <Step action="call:sendEmail" icon="Email" name="NotifyManagers">
+      <Arg name="template" value="ManagerTransfer"/>
+      <Arg name="to" value="string:$(newManagerEmail),$(oldManagerEmail)"/>
+      <Arg name="from" value="administrator@demoexample.com"/>
+      <Transition to="Stop"/>
+    </Step>
+    <Step icon="Stop" name="Stop"/>
+  </Workflow>
 </sailpoint>
