@@ -1,57 +1,47 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
 <sailpoint>
-
-  <!-- Template para los emails automaticos -->
-  <EmailTemplate name="Manager_Transfer">
-    <Body>
-      The following user: $identityName has had a change in manager.
-      Old Manager: $oldManagerName
-      New Manager: $newManagerName
-    </Body>
-    <Subject>Manager transfer completed for: $identityName</Subject>
-  </EmailTemplate>
-
-  <EmailTemplate name="Department_Transfer">
-    <Body>
-      The following user: $identityName has had a change in department.
-      Previous department: $oldDepartmentName
-      New Department: $newDepartmentName
-    </Body>
-    <Subject>Department transfer completed for: $identityName</Subject>
-  </EmailTemplate>
-
-  <EmailTemplate name="StatusChange">
-    <Body>
-      The following user: $identityName has had a change in employment status.
-
-      $reason
-
-    </Body>
-    <Subject>Status transfer completed for: $identityName</Subject>
-  </EmailTemplate>
-
-  <!--QuickLink-->
   <ImportAction name="merge">
     <Configuration name="SystemConfiguration">
       <Attributes>
         <Map>
-          <entry key='quickLinkCategories'>
+          <entry key="helpDeskQuickLinks">
             <value>
               <List>
-                <QuickLinkCategory name="Custom" messageKey="quicklink_category_custom" enabled="true" icon="quickLinkCategoryCustom"/>
-              </List>
-            </value>
-          </entry>
-          <entry key="managerQuickLinks">
-            <value>
-              <List>
-                <QuickLink name="Mover" action="workflow" category="Custom" messageKey="ManagerTransfer">
+                <QuickLink name="Wizard-Terminate" action="workflow" enabled="true" messageKey="Transfer User" category="Custom">
                   <Attributes>
                     <Map>
-                      <entry key="workflowName" value="ManagerTransfer"/>
-                      <entry key="workflowSuccess" value="Starting request..."/>
-                      <entry key="launcher"/>
+                      <entry key="workflowName" value="Transfer User" />
+                      <entry key="workflowSuccess" value="Termination process started..." />
+                      <entry key="manager">
+                        <value>
+                          <Script>
+                            <Source>
+                              if(currentUser.getManager() == null){
+                                return "spadmin";
+                              }
+                              else{
+                                return currentUser.getManager().getName();
+                              }
+                            </Source>
+                          </Script>
+                        </value>
+                      </entry>
+
+                      <entry key="managerEmail">
+                        <value>
+                          <Script>
+                            <Source>
+                              if(currentUser.getManager() == null){
+                                return "spadmin@example.com";
+                              }
+                              else{
+                                return currentUser.getManager().getEmail();
+                              }
+                            </Source>
+                          </Script>
+                        </value>
+                      </entry>
                     </Map>
                   </Attributes>
                 </QuickLink>
@@ -63,47 +53,88 @@
     </Configuration>
   </ImportAction>
 
-  <Workflow  explicitTransitions="true" libraries="Identity" name="ManagerTransfer" type="IdentityLifecycle">
-    <Variable input="true" name="trigger"/>
-    <Variable input="true" name="event" transient="true"/>
-    <Variable input="true" name="identityName"/>
+  <Workflow  explicitTransitions="true"  libraries="Identity" name="Transfer User" type="">
 
-    <Variable name="oldManagerEmail"/>
-    <Variable name="oldManagerName"/>
-    <Variable name="newManagerEmail"/>
-    <Variable name="newManagerName"/>
-
-    <Step icon="Start" name="Start">
-      <Transition to="Process user"/>
-    </Step>
-    <Step icon="Message" name="Process user">
+    <!-- Input Variables -->
+    <Variable initializer="true" input="true" name="trace"/>
+    <Variable initializer="true" input="true" name="debug"/>
+    <Variable input="true" name="quickLinkIdentityId"/>
+    <Variable input="true" name="launcher"/>
+    <Variable input="true" name="identityName">
       <Script>
         <Source>
-          import sailpoint.object.*;
-
-          String identityFullname = event.getIdentityFullName();
-          Identity oldManager = (null != event.getOldObject()) ? event.getOldObject().getManager() : null;
-          Identity newManager = (null != event.getObject()) ? event.getObject().getManager() : null;
-          String oldManagerName = (null != oldManager) ? oldManager.getDisplayableName() : null;
-          String oldManagerEmail = (null != oldManager) ? oldManager.getEmail() : null;
-          String newManagerName = (null != newManager) ? newManager.getDisplayableName() : null;
-          String newManagerEmail= (null != newManager) ? newManager.getEmail() : null;
-          wfcontext.setVariable("oldManagerName",oldManagerName); 
-          wfcontext.setVariable("oldManagerEmail",oldManagerEmail);
-          wfcontext.setVariable("newManagerName",newManagerName);
-          wfcontext.setVariable("newManagerEmail",newManagerEmail);
-
-          System.out.println(identityFullname + " changed managers from " + oldManagerName + " to " + newManagerName);
+          import sailpoint.object.Identity;
+          System.out.println("Calculating identityName variable for id = " + quickLinkIdentityId); 
+          Identity user = context.getObjectById(Identity.class,quickLinkIdentityId);
+          if (user != null) {
+            return user.getName();
+          }
         </Source>
       </Script>
-      <Transition to="NotifyManagers"/>
+    </Variable>
+    <Variable input="true" name="manager"/>
+    <Variable input="true" name="managerEmail"/>
+
+    <!-- Internal Variables -->
+    <Variable name="plan"/>
+    <Variable name="apps"/>
+
+    <Step icon="Start" name="Start" posX="50" posY="50">
+      <Transition to="Build Termination Plan"/>
     </Step>
-    <Step action="call:sendEmail" icon="Email" name="NotifyManagers">
-      <Arg name="template" value="ManagerTransfer"/>
-      <Arg name="to" value="string:$(newManagerEmail),$(oldManagerEmail)"/>
-      <Arg name="from" value="administrator@demoexample.com"/>
-      <Transition to="Stop"/>
+
+    <Step icon="Task" action="call:buildEventPlan" resultVariable="plan" name="Build Termination Plan" posX="150" posY="50">
+      <Arg name="identityName" value="ref:identityName"/>
+      <Arg name="op" value="Update"/>
+      <Transition when='debug.equals("true")' to='DebugPlan'/>
+      <Transition to='DeProvision'/>
     </Step>
-    <Step icon="Stop" name="Stop"/>
+
+    <Step icon="Message" name="DebugPlan" posX="250" posY="150">
+      <Script>
+        <Source>
+          import sailpoint.object.ProvisioningPlan;
+          System.out.println("DebugPlan Step:");
+          System.out.println("Plan = " + plan.toXml());
+        </Source>
+      </Script>
+      <Transition to="DeProvision"/>
+    </Step>
+
+    <Step icon="Task" name="DeProvision" posX="350" posY="50">
+      <Arg name="plan" value="ref:plan"/>
+      <Arg name="trace" value="ref:trace"/>
+      <Arg name="identityName" value="ref:identityName"/>
+      <Arg name="launcher" value="ref:launcher"/>
+
+      <WorkflowRef>
+        <Reference class="sailpoint.object.Workflow" name="LCM Provisioning"/>
+      </WorkflowRef>
+      <Transition to="Refresh Identity"/>
+    </Step>
+
+    <Step icon="Task" action="call:refreshIdentity" name="Refresh Identity">
+      <Arg name="identityName" value="ref:identityName"/>
+      <Arg name="correlateEntitlements" value="string:true"/>
+      <Arg name="provision" value="string:true"/>
+      <Transition to="Notify User"/>
+    </Step>
+
+    <Step action="call:sendEmail" icon="Email" name="Notify User" posX="450" posY="50"> 
+      <Arg name="template" value="Termination"/>
+      <Arg name="to" value="ref:managerEmail"/>
+      <Arg name="from" value="spadmin@example.com"/>
+      <Transition to="end"/>
+    </Step>
+
+    <Step icon="Stop" name="end" posX="550" posY="50"/>
   </Workflow>
+
+  <EmailTemplate name="Termination">
+    <Body>
+      The following user: $identityName has been terminated from the company.
+    </Body>
+    <Subject>Termination completed for: $identityName</Subject>
+  </EmailTemplate>
+
 </sailpoint>
