@@ -8,10 +8,10 @@
           <entry key="helpDeskQuickLinks">
             <value>
               <List>
-                <QuickLink name="Wizard-Terminate" action="workflow" enabled="true" messageKey="User Terminate" category="Custom">
+                <QuickLink name="Wizard-Terminate" action="workflow" enabled="true" messageKey="Transfer User" category="Custom">
                   <Attributes>
                     <Map>
-                      <entry key="workflowName" value="Prov-TerminateUser" />
+                      <entry key="workflowName" value="Transfer User" />
                       <entry key="workflowSuccess" value="Termination process started..." />
                       <entry key="manager">
                         <value>
@@ -53,7 +53,7 @@
     </Configuration>
   </ImportAction>
 
-  <Workflow  explicitTransitions="true"  libraries="Identity" name="Prov-TerminateUser" type="">
+  <Workflow  explicitTransitions="true"  libraries="Identity" name="Transfer User" type="">
 
     <!-- Input Variables -->
     <Variable initializer="true" input="true" name="trace"/>
@@ -110,6 +110,13 @@
       <WorkflowRef>
         <Reference class="sailpoint.object.Workflow" name="LCM Provisioning"/>
       </WorkflowRef>
+      <Transition to="Refresh Identity"/>
+    </Step>
+
+    <Step icon="Task" action="call:refreshIdentity" name="Refresh Identity">
+      <Arg name="identityName" value="ref:identityName"/>
+      <Arg name="correlateEntitlements" value="string:true"/>
+      <Arg name="provision" value="string:true"/>
       <Transition to="Notify User"/>
     </Step>
 
