@@ -1,39 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
 <sailpoint>
-
-  <!--QuickLink-->
-  <ImportAction name="merge">
-    <Configuration name="SystemConfiguration">
-      <Attributes>
-        <Map>
-          <entry key='quickLinkCategories'>
-            <value>
-              <List>
-                <QuickLinkCategory name="Manager" messageKey="quicklink_category_manager" enabled="true" icon="quickLinkCategoryManager"/>
-              </List>
-            </value>
-          </entry>
-          <entry key="managerQuickLinks">
-            <value>
-              <List>
-                <QuickLink name="Mover" action="workflow" category="Manager" messageKey="ManagerTransfer">
-                  <Attributes>
-                    <Map>
-                      <entry key="workflowName" value="ManagerTransfer"/>
-                      <entry key="workflowSuccess" value="Starting request..."/>
-                      <entry key="launcher"/>
-                    </Map>
-                  </Attributes>
-                </QuickLink>
-              </List>
-            </value>
-          </entry>
-        </Map>
-      </Attributes>
-    </Configuration>
-  </ImportAction>
-
   <Workflow  explicitTransitions="true" libraries="Identity" name="ManagerTransfer" type="LCM">
     
   <!-- input variables from quicklink -->
