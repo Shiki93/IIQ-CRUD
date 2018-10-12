@@ -1,39 +1,11 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <!DOCTYPE QuickLink PUBLIC "sailpoint.dtd" "sailpoint.dtd">
-<QuickLink name="Wizard Transfer" action="workflow" enabled="true" messageKey="Transfer User" category="Custom">
+<QuickLink name="Mover" action="workflow" category="Manager" messageKey="ManagerTransfer">
   <Attributes>
     <Map>
-      <entry key="workflowName" value="Transfer User" />
-      <entry key="workflowSuccess" value="Transfer process started..." />
-      <entry key="manager">
-        <value>
-          <Script>
-            <Source>
-                              if(currentUser.getManager() == null){
-                                return "spadmin";
-                              }
-                              else{
-                                return currentUser.getManager().getName();
-                              }
-            </Source>
-          </Script>
-        </value>
-      </entry>
-
-      <entry key="managerEmail">
-        <value>
-          <Script>
-            <Source>
-                              if(currentUser.getManager() == null){
-                                return "spadmin@example.com";
-                              }
-                              else{
-                                return currentUser.getManager().getEmail();
-                              }
-            </Source>
-          </Script>
-        </value>
-      </entry>
+      <entry key="workflowName" value="ManagerTransfer"/>
+      <entry key="workflowSuccess" value="Starting request..."/>
+      <entry key="launcher"/>
     </Map>
   </Attributes>
 </QuickLink>
