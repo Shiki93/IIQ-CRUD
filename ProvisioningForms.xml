@@ -10,13 +10,20 @@
         </Map>
       </Attributes>
       <Field displayName="con_prov_policy_ad_objecttype" filterString="" name="ObjectType" required="true" section="Account" type="string" value="User"/>
-      <Field displayName="con_prov_policy_ad_distinguishedName" filterString="" helpKey="help_con_prov_policy_ad_distinguishedName" name="distinguishedName" required="true" section="Account" type="string"/>
-      <Field displayName="con_prov_policy_ad_sAMAccountName" filterString="" helpKey="help_con_prov_policy_ad_sAMAccountName" name="sAMAccountName" required="true" section="Account" type="string"/>
+      <Field displayName="User Distinguised Name" filterString="" helpKey="help_con_prov_policy_ad_distinguishedName" name="distinguishedName" required="true" section="Account" type="string"/>
+      <Field displayName="Login Name" filterString="" helpKey="help_con_prov_policy_ad_sAMAccountName" name="sAMAccountName" required="true" section="Account" type="string"/>
       <Field displayName="con_prov_policy_ad_password" filterString="" helpKey="help_con_prov_policy_ad_password" name="password" required="true" section="Account" type="secret"/>
       <Field displayName="con_prov_policy_ad_pwdLastSet" filterString="" helpKey="help_con_prov_policy_ad_pwdLastSet" name="pwdLastSet" reviewRequired="true" section="Account" type="boolean"/>
       <Field displayName="Email Address" filterString="" helpKey="Insert a email adress like exaple@domain.net" name="mail" required="true" type="string"/>
       <Field displayName="Department" filterString="" helpKey="Insert a department like Accounting, Sales or IT" name="department" reviewRequired="true" type="string"/>
-      <Field displayName="con_prov_policy_ad_IIQDisabled" filterString="" helpKey="help_con_prov_policy_ad_IIQDisabled" name="IIQDisabled" reviewRequired="true" section="Account" type="boolean" value="false"/>
+      <Field displayName="Manager" filterString="" helpKey="Insert a manager" name="manager" reviewRequired="true" type="string"/>
+      <Field displayName="con_prov_policy_ad_IIQDisabled" filterString="" helpKey="help_con_prov_policy_ad_IIQDisabled" name="IIQDisabled" reviewRequired="true" section="Account" type="boolean" value="false">
+        <Attributes>
+          <Map>
+            <entry key="hidden" value="true"/>
+          </Map>
+        </Attributes>
+      </Field>
       <Field displayName="con_prov_policy_ad_primaryGroupDN" filterString="" helpKey="help_con_prov_policy_ad_primaryGroupDN" name="primaryGroupDN" reviewRequired="true" section="Account" type="string"/>
       <Field displayName="con_prov_policy_ad_givenName" filterString="" helpKey="help_con_prov_policy_ad_givenName" name="givenName" reviewRequired="true" section="General" type="string"/>
       <Field displayName="con_prov_policy_ad_sn" filterString="" helpKey="help_con_prov_policy_ad_sn" name="sn" reviewRequired="true" section="General" type="string"/>
@@ -31,16 +38,75 @@
             </List>
           </Value>
         </AllowedValuesDefinition>
+        <Attributes>
+          <Map>
+            <entry key="hidden" value="true"/>
+          </Map>
+        </Attributes>
       </Field>
-      <Field displayName="con_prov_policy_ad_msNPCallingStationID" filterString="" helpKey="help_con_prov_policy_ad_msNPCallingStationID" multi="true" name="msNPCallingStationID" reviewRequired="true" section="Dial-in" type="string"/>
-      <Field displayName="con_prov_policy_ad_msRADIUSCallbackNumber" filterString="" helpKey="help_con_prov_policy_ad_msRADIUSCallbackNumber" name="msRADIUSCallbackNumber" reviewRequired="true" section="Dial-in" type="string"/>
-      <Field displayName="con_prov_policy_ad_msRADIUSFramedRoute" filterString="" helpKey="help_con_prov_policy_ad_msRADIUSFramedRoute" multi="true" name="msRADIUSFramedRoute" reviewRequired="true" section="Dial-in" type="string"/>
-      <Field displayName="con_prov_policy_ad_msRADIUSFramedIPAddress" filterString="" helpKey="help_con_prov_policy_ad_msRADIUSFramedIPAddress" name="msRADIUSFramedIPAddress" reviewRequired="true" section="Dial-in" type="string"/>
-      <Field displayName="con_prov_policy_ad_homeMDB" filterString="" helpKey="help_con_prov_policy_ad_homeMDB" name="homeMDB" reviewRequired="true" section="Exchange" type="string"/>
-      <Field displayName="con_prov_policy_ad_mailNickname" filterString="" helpKey="help_con_prov_policy_ad_mailNickname" name="mailNickname" reviewRequired="true" section="Exchange" type="string"/>
-      <Field displayName="con_prov_policy_ad_msExchHideFromAddressLists" filterString="" helpKey="help_con_prov_policy_ad_msExchHideFromAddressLists" name="msExchHideFromAddressLists" reviewRequired="true" section="Exchange" type="boolean"/>
-      <Field displayName="con_prov_policy_ad_SipAddress" filterString="" helpKey="help_con_prov_policy_ad_SipAddress" name="SipAddress" reviewRequired="true" section="Lync" type="string"/>
-      <Field displayName="con_prov_policy_ad_SipDomain" filterString="" helpKey="help_con_prov_policy_ad_SipDomain" name="SipDomain" reviewRequired="true" section="Lync" type="string"/>
+      <Field displayName="con_prov_policy_ad_msNPCallingStationID" filterString="" helpKey="help_con_prov_policy_ad_msNPCallingStationID" multi="true" name="msNPCallingStationID" reviewRequired="true" section="Dial-in" type="string">
+        <Attributes>
+          <Map>
+            <entry key="hidden" value="true"/>
+          </Map>
+        </Attributes>
+      </Field>
+      <Field displayName="con_prov_policy_ad_msRADIUSCallbackNumber" filterString="" helpKey="help_con_prov_policy_ad_msRADIUSCallbackNumber" name="msRADIUSCallbackNumber" reviewRequired="true" section="Dial-in" type="string">
+        <Attributes>
+          <Map>
+            <entry key="hidden" value="true"/>
+          </Map>
+        </Attributes>
+      </Field>
+      <Field displayName="con_prov_policy_ad_msRADIUSFramedRoute" filterString="" helpKey="help_con_prov_policy_ad_msRADIUSFramedRoute" multi="true" name="msRADIUSFramedRoute" reviewRequired="true" section="Dial-in" type="string">
+        <Attributes>
+          <Map>
+            <entry key="hidden" value="true"/>
+          </Map>
+        </Attributes>
+      </Field>
+      <Field displayName="con_prov_policy_ad_msRADIUSFramedIPAddress" filterString="" helpKey="help_con_prov_policy_ad_msRADIUSFramedIPAddress" name="msRADIUSFramedIPAddress" reviewRequired="true" section="Dial-in" type="string">
+        <Attributes>
+          <Map>
+            <entry key="hidden" value="true"/>
+          </Map>
+        </Attributes>
+      </Field>
+      <Field displayName="con_prov_policy_ad_homeMDB" filterString="" helpKey="help_con_prov_policy_ad_homeMDB" name="homeMDB" reviewRequired="true" section="Exchange" type="string">
+        <Attributes>
+          <Map>
+            <entry key="hidden" value="true"/>
+          </Map>
+        </Attributes>
+      </Field>
+      <Field displayName="con_prov_policy_ad_mailNickname" filterString="" helpKey="help_con_prov_policy_ad_mailNickname" name="mailNickname" reviewRequired="true" section="Exchange" type="string">
+        <Attributes>
+          <Map>
+            <entry key="hidden" value="true"/>
+          </Map>
+        </Attributes>
+      </Field>
+      <Field displayName="con_prov_policy_ad_msExchHideFromAddressLists" filterString="" helpKey="help_con_prov_policy_ad_msExchHideFromAddressLists" name="msExchHideFromAddressLists" reviewRequired="true" section="Exchange" type="boolean">
+        <Attributes>
+          <Map>
+            <entry key="hidden" value="true"/>
+          </Map>
+        </Attributes>
+      </Field>
+      <Field displayName="con_prov_policy_ad_SipAddress" filterString="" helpKey="help_con_prov_policy_ad_SipAddress" name="SipAddress" reviewRequired="true" section="Lync" type="string">
+        <Attributes>
+          <Map>
+            <entry key="hidden" value="true"/>
+          </Map>
+        </Attributes>
+      </Field>
+      <Field displayName="con_prov_policy_ad_SipDomain" filterString="" helpKey="help_con_prov_policy_ad_SipDomain" name="SipDomain" reviewRequired="true" section="Lync" type="string">
+        <Attributes>
+          <Map>
+            <entry key="hidden" value="true"/>
+          </Map>
+        </Attributes>
+      </Field>
       <Field displayName="con_prov_policy_ad_SipAddressType" filterString="" helpKey="help_con_prov_policy_ad_SipAddressType" name="SipAddressType" reviewRequired="true" section="Lync" type="string">
         <AllowedValuesDefinition>
           <Value>
@@ -51,26 +117,29 @@
             </List>
           </Value>
         </AllowedValuesDefinition>
+        <Attributes>
+          <Map>
+            <entry key="hidden" value="true"/>
+          </Map>
+        </Attributes>
       </Field>
-      <Field displayName="con_prov_policy_ad_RegistrarPool" filterString="" helpKey="help_con_prov_policy_ad_RegistrarPool" name="RegistrarPool" reviewRequired="true" section="Lync" type="string"/>
+      <Field displayName="con_prov_policy_ad_RegistrarPool" filterString="" helpKey="help_con_prov_policy_ad_RegistrarPool" name="RegistrarPool" reviewRequired="true" section="Lync" type="string">
+        <Attributes>
+          <Map>
+            <entry key="hidden" value="true"/>
+          </Map>
+        </Attributes>
+      </Field>
     </Form>
-    <Form name="UpdateAD" objectType="account" type="Update">
-      <Attributes>
-        <Map>
-          <entry key="IIQTemplateOwnerDefinition">
-            <value>
-              <DynamicValue value=""/>
-            </value>
-          </entry>
-        </Map>
-      </Attributes>
+    <Form name="Mover Account" objectType="account" type="Update">
       <Field displayName="con_prov_policy_ad_objecttype" filterString="" name="ObjectType" required="true" section="Account" type="string" value="User"/>
-      <Field displayName="con_prov_policy_ad_distinguishedName" filterString="" helpKey="help_con_prov_policy_ad_distinguishedName" name="distinguishedName" required="true" section="Account" type="string"/>
-      <Field displayName="con_prov_policy_ad_sAMAccountName" filterString="" helpKey="help_con_prov_policy_ad_sAMAccountName" name="sAMAccountName" required="true" section="Account" type="string"/>
+      <Field displayName="User Distinguised Name" filterString="" helpKey="help_con_prov_policy_ad_distinguishedName" name="distinguishedName" required="true" section="Account" type="string"/>
+      <Field displayName="Login Name" filterString="" helpKey="help_con_prov_policy_ad_sAMAccountName" name="sAMAccountName" required="true" section="Account" type="string"/>
       <Field displayName="con_prov_policy_ad_password" filterString="" helpKey="help_con_prov_policy_ad_password" name="password" required="true" section="Account" type="secret"/>
       <Field displayName="con_prov_policy_ad_pwdLastSet" filterString="" helpKey="help_con_prov_policy_ad_pwdLastSet" name="pwdLastSet" reviewRequired="true" section="Account" type="boolean"/>
       <Field displayName="Email Address" filterString="" helpKey="Insert a email adress like exaple@domain.net" name="mail" required="true" type="string"/>
       <Field displayName="Department" filterString="" helpKey="Insert a department like Accounting, Sales or IT" name="department" reviewRequired="true" type="string"/>
+      <Field displayName="Manager" filterString="" helpKey="Insert a manager" name="manager" reviewRequired="true" type="string"/>
       <Field displayName="con_prov_policy_ad_IIQDisabled" filterString="" helpKey="help_con_prov_policy_ad_IIQDisabled" name="IIQDisabled" reviewRequired="true" section="Account" type="boolean" value="false"/>
       <Field displayName="con_prov_policy_ad_primaryGroupDN" filterString="" helpKey="help_con_prov_policy_ad_primaryGroupDN" name="primaryGroupDN" reviewRequired="true" section="Account" type="string"/>
       <Field displayName="con_prov_policy_ad_givenName" filterString="" helpKey="help_con_prov_policy_ad_givenName" name="givenName" reviewRequired="true" section="General" type="string"/>
@@ -86,16 +155,75 @@
             </List>
           </Value>
         </AllowedValuesDefinition>
+        <Attributes>
+          <Map>
+            <entry key="hidden" value="true"/>
+          </Map>
+        </Attributes>
       </Field>
-      <Field displayName="con_prov_policy_ad_msNPCallingStationID" filterString="" helpKey="help_con_prov_policy_ad_msNPCallingStationID" multi="true" name="msNPCallingStationID" reviewRequired="true" section="Dial-in" type="string"/>
-      <Field displayName="con_prov_policy_ad_msRADIUSCallbackNumber" filterString="" helpKey="help_con_prov_policy_ad_msRADIUSCallbackNumber" name="msRADIUSCallbackNumber" reviewRequired="true" section="Dial-in" type="string"/>
-      <Field displayName="con_prov_policy_ad_msRADIUSFramedRoute" filterString="" helpKey="help_con_prov_policy_ad_msRADIUSFramedRoute" multi="true" name="msRADIUSFramedRoute" reviewRequired="true" section="Dial-in" type="string"/>
-      <Field displayName="con_prov_policy_ad_msRADIUSFramedIPAddress" filterString="" helpKey="help_con_prov_policy_ad_msRADIUSFramedIPAddress" name="msRADIUSFramedIPAddress" reviewRequired="true" section="Dial-in" type="string"/>
-      <Field displayName="con_prov_policy_ad_homeMDB" filterString="" helpKey="help_con_prov_policy_ad_homeMDB" name="homeMDB" reviewRequired="true" section="Exchange" type="string"/>
-      <Field displayName="con_prov_policy_ad_mailNickname" filterString="" helpKey="help_con_prov_policy_ad_mailNickname" name="mailNickname" reviewRequired="true" section="Exchange" type="string"/>
-      <Field displayName="con_prov_policy_ad_msExchHideFromAddressLists" filterString="" helpKey="help_con_prov_policy_ad_msExchHideFromAddressLists" name="msExchHideFromAddressLists" reviewRequired="true" section="Exchange" type="boolean"/>
-      <Field displayName="con_prov_policy_ad_SipAddress" filterString="" helpKey="help_con_prov_policy_ad_SipAddress" name="SipAddress" reviewRequired="true" section="Lync" type="string"/>
-      <Field displayName="con_prov_policy_ad_SipDomain" filterString="" helpKey="help_con_prov_policy_ad_SipDomain" name="SipDomain" reviewRequired="true" section="Lync" type="string"/>
+      <Field displayName="con_prov_policy_ad_msNPCallingStationID" filterString="" helpKey="help_con_prov_policy_ad_msNPCallingStationID" multi="true" name="msNPCallingStationID" reviewRequired="true" section="Dial-in" type="string">
+        <Attributes>
+          <Map>
+            <entry key="hidden" value="true"/>
+          </Map>
+        </Attributes>
+      </Field>
+      <Field displayName="con_prov_policy_ad_msRADIUSCallbackNumber" filterString="" helpKey="help_con_prov_policy_ad_msRADIUSCallbackNumber" name="msRADIUSCallbackNumber" reviewRequired="true" section="Dial-in" type="string">
+        <Attributes>
+          <Map>
+            <entry key="hidden" value="true"/>
+          </Map>
+        </Attributes>
+      </Field>
+      <Field displayName="con_prov_policy_ad_msRADIUSFramedRoute" filterString="" helpKey="help_con_prov_policy_ad_msRADIUSFramedRoute" multi="true" name="msRADIUSFramedRoute" reviewRequired="true" section="Dial-in" type="string">
+        <Attributes>
+          <Map>
+            <entry key="hidden" value="true"/>
+          </Map>
+        </Attributes>
+      </Field>
+      <Field displayName="con_prov_policy_ad_msRADIUSFramedIPAddress" filterString="" helpKey="help_con_prov_policy_ad_msRADIUSFramedIPAddress" name="msRADIUSFramedIPAddress" reviewRequired="true" section="Dial-in" type="string">
+        <Attributes>
+          <Map>
+            <entry key="hidden" value="true"/>
+          </Map>
+        </Attributes>
+      </Field>
+      <Field displayName="con_prov_policy_ad_homeMDB" filterString="" helpKey="help_con_prov_policy_ad_homeMDB" name="homeMDB" reviewRequired="true" section="Exchange" type="string">
+        <Attributes>
+          <Map>
+            <entry key="hidden" value="true"/>
+          </Map>
+        </Attributes>
+      </Field>
+      <Field displayName="con_prov_policy_ad_mailNickname" filterString="" helpKey="help_con_prov_policy_ad_mailNickname" name="mailNickname" reviewRequired="true" section="Exchange" type="string">
+        <Attributes>
+          <Map>
+            <entry key="hidden" value="true"/>
+          </Map>
+        </Attributes>
+      </Field>
+      <Field displayName="con_prov_policy_ad_msExchHideFromAddressLists" filterString="" helpKey="help_con_prov_policy_ad_msExchHideFromAddressLists" name="msExchHideFromAddressLists" reviewRequired="true" section="Exchange" type="boolean">
+        <Attributes>
+          <Map>
+            <entry key="hidden" value="true"/>
+          </Map>
+        </Attributes>
+      </Field>
+      <Field displayName="con_prov_policy_ad_SipAddress" filterString="" helpKey="help_con_prov_policy_ad_SipAddress" name="SipAddress" reviewRequired="true" section="Lync" type="string">
+        <Attributes>
+          <Map>
+            <entry key="hidden" value="true"/>
+          </Map>
+        </Attributes>
+      </Field>
+      <Field displayName="con_prov_policy_ad_SipDomain" filterString="" helpKey="help_con_prov_policy_ad_SipDomain" name="SipDomain" reviewRequired="true" section="Lync" type="string">
+        <Attributes>
+          <Map>
+            <entry key="hidden" value="true"/>
+          </Map>
+        </Attributes>
+      </Field>
       <Field displayName="con_prov_policy_ad_SipAddressType" filterString="" helpKey="help_con_prov_policy_ad_SipAddressType" name="SipAddressType" reviewRequired="true" section="Lync" type="string">
         <AllowedValuesDefinition>
           <Value>
@@ -106,8 +234,19 @@
             </List>
           </Value>
         </AllowedValuesDefinition>
+        <Attributes>
+          <Map>
+            <entry key="hidden" value="true"/>
+          </Map>
+        </Attributes>
       </Field>
-      <Field displayName="con_prov_policy_ad_RegistrarPool" filterString="" helpKey="help_con_prov_policy_ad_RegistrarPool" name="RegistrarPool" reviewRequired="true" section="Lync" type="string"/>
+      <Field displayName="con_prov_policy_ad_RegistrarPool" filterString="" helpKey="help_con_prov_policy_ad_RegistrarPool" name="RegistrarPool" reviewRequired="true" section="Lync" type="string">
+        <Attributes>
+          <Map>
+            <entry key="hidden" value="true"/>
+          </Map>
+        </Attributes>
+      </Field>
     </Form>
     <Form name="Create Group" objectType="group" type="Create">
       <Field displayName="con_prov_policy_ad_distinguishedName_group" helpKey="help_con_prov_policy_ad_group_distinguishedName" name="distinguishedName" required="true" type="string"/>
