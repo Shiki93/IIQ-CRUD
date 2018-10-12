@@ -5,14 +5,14 @@
     <Configuration name="SystemConfiguration">
       <Attributes>
         <Map>
-          <entry key="helpDeskQuickLinks">
+          <entry key="selfServiceQuickLinks">
             <value>
               <List>
-                <QuickLink name="Wizard-Terminate" action="workflow" enabled="true" messageKey="Transfer User" category="Custom">
+                <QuickLink name="Wizard Transfer" action="workflow" enabled="true" messageKey="Transfer User" category="Custom">
                   <Attributes>
                     <Map>
                       <entry key="workflowName" value="Transfer User" />
-                      <entry key="workflowSuccess" value="Termination process started..." />
+                      <entry key="workflowSuccess" value="Transfer process started..." />
                       <entry key="manager">
                         <value>
                           <Script>
@@ -77,7 +77,6 @@
 
     <!-- Internal Variables -->
     <Variable name="plan"/>
-    <Variable name="apps"/>
 
     <Step icon="Start" name="Start" posX="50" posY="50">
       <Transition to="Build Termination Plan"/>
@@ -85,7 +84,7 @@
 
     <Step icon="Task" action="call:buildEventPlan" resultVariable="plan" name="Build Termination Plan" posX="150" posY="50">
       <Arg name="identityName" value="ref:identityName"/>
-      <Arg name="op" value="Update"/>
+      <Arg name="op" value="Modify"/>
       <Transition when='debug.equals("true")' to='DebugPlan'/>
       <Transition to='DeProvision'/>
     </Step>
@@ -121,7 +120,7 @@
     </Step>
 
     <Step action="call:sendEmail" icon="Email" name="Notify User" posX="450" posY="50"> 
-      <Arg name="template" value="Termination"/>
+      <Arg name="template" value="Transfer"/>
       <Arg name="to" value="ref:managerEmail"/>
       <Arg name="from" value="spadmin@example.com"/>
       <Transition to="end"/>
@@ -130,11 +129,11 @@
     <Step icon="Stop" name="end" posX="550" posY="50"/>
   </Workflow>
 
-  <EmailTemplate name="Termination">
+  <EmailTemplate name="Transfer">
     <Body>
-      The following user: $identityName has been terminated from the company.
+      The following user: $identityName has been transfered from the department.
     </Body>
-    <Subject>Termination completed for: $identityName</Subject>
+    <Subject>Transfer completed for: $identityName</Subject>
   </EmailTemplate>
 
 </sailpoint>

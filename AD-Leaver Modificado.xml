@@ -108,7 +108,6 @@
       <Arg name="launcher" value="ref:launcher"/>
 
       <WorkflowRef>
-        System.out.println("\n\n\n\n");
         <Reference class="sailpoint.object.Workflow" name="LCM Provisioning"/>
       </WorkflowRef>
       <Transition to="Notify User"/>
