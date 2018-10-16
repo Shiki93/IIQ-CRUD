@@ -55,8 +55,7 @@
   </ImportAction>
 
   <Workflow  explicitTransitions="true" libraries="Identity" name="ManagerTransfer" type="LCM">
-    
-  <!-- input variables from quicklink -->
+    <!-- input variables from quicklink -->
     <Variable input="true" name="launcher"/>
     <Variable input="true" name="currentUserName"/>
     <Variable input="true" name="quickLinkIdentityId"/>
@@ -67,70 +66,70 @@
 
     <Variable name="plan"/>
     <Variable input="true" name="event"/>
-
     <Variable initializer="script:(identityDisplayName != void) ? identityDisplayName : resolveDisplayName(identityName)" input="true" name="identityDisplayName"/>
-
-    <Variable input="true" name="identityObjt" initializer="script:context.getObjectByName(Identity.class,identityName);"/>
-
-    <Variable input="true" name="identityPass" initializer="script:identityObjt.getPassword();"/>
-    <Variable input="true" name="identityEmail" initializer="script:identityObjt.getEmail();"/>
-    <Variable input="true" name="managerIdentity" initializer="script:identityObjt.getManager().getName();"/>
-    <Variable input="true" name="identityFirstName" initializer="script:identityObjt.getFirstname();"/>
-    <Variable input="true" name="identityLastName" initializer="script:identityObjt.getLastname();"/>
-    <Variable input="true" name="identityDepartment" initializer='script:identityObjt.getAttribute("department");'/>
-
+    <Variable input="true" name="identityEmail" initializer="script:context.getObjectByName(Identity.class,identityName).getEmail();"/>
     <Variable initializer="AccountsRequest" input="true" name="flow"/>
-    <Variable name="ADConnectoraccess"/>
     <Variable name="identityRequestId"/>
     <Variable initializer="manager" input="true" name="fallbackApprover"/>
     <Variable name="project"/>
+    <Variable editable="true" initializer="false" name="optimisticProvisioning"/>
+    <Variable editable="true" initializer="true" name="foregroundProvisioning"/>
+    <Variable name="identityRequestId" output="true"/>
+    <Variable initializer="LCM" input="true" name="source"/>
+    <Variable name="cart" output="true"/>
+    <Variable name="identityObject">
+      <Script>
+        <Source>
+          System.out.println("Initializing Workflow variables for IdentityObject");
+          Identity identityObject = context.getObjectByName(Identity.class, identityName);
+          return identityObject;
+        </Source>
+      </Script>
+    </Variable>
+    <Variable name="newEmail"/>
+    <Variable name="newDepartment"/>
 
     <Step icon="Start" name="Start" posX="50" posY="50">
       <Transition to="Display Form"/>
     </Step>
 
     <Step icon="Message" name="Display Form" posX="100" posY="50">
-      <Approval owner="ref:manager" send="identityName" return="ADConnectoraccess">
+      <Approval owner="ref:manager" send='identityName'>
         <Arg name='workItemDescription' value='Process change user: $(identityName)'/>
         <Arg name="workItemRequester" value="ref:identityName"/>
         <Arg name="workItemNotificationTemplate" value="MoverEmployeeManager"/>
         <Arg name="workItemType" value="ManualAction"/>
-
-        <Arg name="identityPass" value="ref:identityPass"/>
-        <Arg name="identityFirstName" value="ref:identityFirstName"/>
-        <Arg name="identityLastName" value="ref:identityLastName"/>
-        <Arg name="identityEmail" value="ref:identityEmail"/>
-        <Arg name="managerIdentity" value="ref:managerIdentity"/>
-        <Arg name="identityDepartment" value="ref:identityDepartment"/>
+        <Arg name="email" value="ref:email"/>
         <Arg name="identityDisplayName" value="ref:identityDisplayName"/>
+        <Arg name="manager" value="ref:manager"/>
+        <Arg name="newEmail" value="ref:newEmail"/>
+        <Arg name="newDepartment" value="ref:newDepartment"/>
 
         <Form name="UserUpdate">
           <Section name='userUpdate' type='text' label='Instructions'>
             <Field name='Directions' value='Update to employee: $(identityName)'/>
           </Section>
 
-          <Section type="datable" label="Login Information">
-            <Field displayName="Login Name" name="sAMAccountName" value="$(identityName)" required="true"/>
-
-            <Field displayName="Password" name="password" reviewRequired="true" type="secret" required="true" value="$(identityPass)"/>
-            <Field displayName="Password Confirmation" name="passwordConfirm" reviewRequired="true" type="secret" required="true" value="$(identityPass)"/>
+          <Section type="datable" label="User Name">
+            <Field displayName="Employee Name" name="identityName"/>
+            <Field displayName="Employee Manager" name="manager"/>
           </Section>
 
-          <Section type="datable" label="Account Details">
-            <Field displayName="First Name" name="firstName" type="String" value="$(identityFirstName)"/>
-            <Field displayName="Last Name" name="sn" type="String" value="$(identityLastName)"/>
-            <Field displayName="Email" name="mail" type="String" value="$(identityEmail)" required="true"/>
+          <Section>
 
+            <Field displayName="Full Name" name="fullName" type="String" dynamic="true" value="$(identityDisplayName)"/>
 
-            <Field displayName="Manager" filterString="managerStatus == true" name="manager" type="sailpoint.object.Identity" value="$(managerIdentity)"/>
+            <Field displayName="User Name" name="sAMAccountName" type="String" value="$(identityName)"/>
 
-            <Field displayName="Department" name="department" type="String" value="$(identityDepartment)">
+            <Field displayName="Email" name="newEmail" type="String" value="$(email)"/>
+
+            <Field displayName="Manager" filterString="managerStatus == true" name="manager" type="sailpoint.object.Identity"/>
+
+            <Field displayName="Department" name="newDepartment" type="String" value="Sales">
               <AllowedValues>
                 <String>Sales</String>
                 <String>Management</String>
                 <String>Customer Service</String>
-                <String>Software Develop</String>
-                <String>Finances</String>
                 <String>IT Support</String>
               </AllowedValues>
             </Field>
@@ -140,97 +139,102 @@
           <Button label='Submit' action='next'/>
           <Button label='Cancel' action='cancel'/>
         </Form>
+        <Return name="manager" to="manager"/>
+        <Return name="newEmail" to="newEmail"/>
+        <Return name="newDepartment" to="newDepartment"/>
       </Approval>
-      <Transition to="Create Modify Plan"/>
+      <Transition to="Create Plan"/>
     </Step>
 
-    <Step icon="Task" name="Create Modify Plan" resultVariable="plan" posX="150" posY="50">
-    	<Script>
-    		<Source>
-    			import sailpoint.object.ProvisioningPlan;
-    			import sailpoint.object.ProvisioningPlan.AccountRequest;
-    			import sailpoint.object.ProvisioningPlan.AttributeRequest;
-    			import java.util.List;
-    			import java.util.ArrayList;
+    <Step icon="Task" name="Create Plan" resultVariable="plan" posX="150" posY="50">
+      <Script>
+        <Source>
+          import sailpoint.object.ProvisioningPlan;
+          import sailpoint.object.ProvisioningPlan.AccountRequest;
+          import sailpoint.object.ProvisioningPlan.AttributeRequest;
+          import java.util.List;
+          import java.util.ArrayList;
 
-    			ProvisioningPlan plan = new ProvisioningPlan();
-    			List accreqs = new ArrayList();
+          ProvisioningPlan plan = new ProvisioningPlan();
+          List accreqs = new ArrayList();
 
-    			if (ADConnectoraccess) {
-    				AccountRequest acctReq = new AccountRequest();
-    				acctReq.setOperation(AccountRequest.Operation.Modify);
-    				acctReq.setApplication("AD Connector");
-    				accreqs.add(acctReq);
-    			}
+          AccountRequest acctReq = new AccountRequest();
+          acctReq.setOperation(AccountRequest.Operation.Modify);
+          acctReq.setApplication("AD Connector");
+          acctReq.add(new AttributeRequest("sAMAccountName",identityName));
+          acctReq.add(new AttributeRequest("manager","CN=Adam Kennedy,CN=users,DC=ad_training,DC=net"));
+          acctReq.add(new AttributeRequest("mail",newEmail));
+          acctReq.add(new AttributeRequest("department",newDepartment));
+          acctReq.setNativeIdentity("CN=" + identityDisplayName + ",CN=Users,DC=ad_training,DC=net");
+          accreqs.add(acctReq);
 
+          plan.setAccountRequests(accreqs);
+          plan.setIdentity(identityObject);
+          return plan;
+        </Source>
+      </Script>
+      <Transition to="Initialize"/>
+    </Step>
 
-    			if(plan != null){
-					System.out.println("El plan fue creado correctamente.");
-					plan.setAccountRequests(accreqs);
-					plan.setIdentity(identityObject);
-				}
-				return plan;
-			</Source>
-		</Script>
-		<Transition to="Initialize"/>
-	</Step>
+    <Step icon="Task" name="Initialize" posX="600" posY="50">
+      <Arg name="formTemplate" value="Identity Update"/>
+      <Arg name="identityName" value="ref:identityName"/>
+      <Arg name="identityDisplayName" value="ref:identityDisplayName"/>
+      <Arg name="launcher" value="ref:launcher"/>
+      <Arg name="optimisticProvisioning" value="ref:optimisticProvisioning"/>
+      <Arg name="plan" value="ref:plan"/>
+      <Arg name="priority" value="ref:workItemPriority"/>
+      <Arg name="policyScheme" value="none"/>
+      <Arg name="source" value="ref:source"/>
+      <Arg name="trace" value="ref:trace"/>
+      <Arg name="flow" value="ref:flow"/>
+      <Return name="project" to="project"/>
+      <Return name="approvalSet" to="cart"/>
+      <Return name="identityRequestId" to="identityRequestId"/>
+      <Return name="policyViolations" to="policyViolations"/>
 
-	<Step icon="Task" name="Initialize" posX="200" posY="50">
-	    <Arg name="formTemplate" value="Identity Update"/>
-	    <Arg name="identityName" value="ref:identityName"/>
-	    <Arg name="identityDisplayName" value="ref:identityDisplayName"/>
-	    <Arg name="launcher" value="ref:launcher"/>
-	    <Arg name="plan" value="ref:plan"/>
-	    <Arg name="priority" value="ref:workItemPriority"/>
-	    <Arg name="policyScheme" value="none"/>
-	    <Arg name="source" value="ref:source"/>
-	    <Arg name="trace" value="ref:trace"/>
-	    <Arg name="flow" value="ref:flow"/>
-    	<Return name="project" to="project"/>
-	    <Return name="approvalSet" to="cart"/>
-	    <Return name="identityRequestId" to="identityRequestId"/>
+      <WorkflowRef>
+        <Reference class="sailpoint.object.Workflow" name="Identity Request Initialize"/>
+      </WorkflowRef>
+      <Transition to="Provision"/>
+  </Step>
 
-	    <WorkflowRef>
-	      <Reference class="sailpoint.object.Workflow" name="Identity Request Initialize"/>
-	    </WorkflowRef>
-	    <Transition to="Provision"/>
-	</Step>
+    <Step icon="Task" name="Provision" posX="800" posY="50">
+      <Arg name="fallbackApprover" value="ref:fallbackApprover"/>
+      <Arg name="foregroundProvisioning" value="ref:foregroundProvisioning"/>
+      <Arg name="formTemplate" value="Identity Update"/>
+      <Arg name="identityDisplayName" value="ref:identityDisplayName"/>
+      <Arg name="identityName" value="ref:identityName"/>
+      <Arg name="launcher" value="ref:launcher"/>
+      <Arg name="manualActionsEmailTemplate" value="Pending Manual Change"/>
+      <Arg name="optimisticProvisioning" value="ref:optimisticProvisioning"/>
+      <Arg name="project" value="ref:project"/>
+      <Arg name="policyScheme" value="none"/>
+      <Arg name="trace" value="ref:trace"/>
+      <Return name="project" to="project"/>
+      <WorkflowRef>
+        <Reference class="sailpoint.object.Workflow" name="Identity Request Provision"/>
+      </WorkflowRef>
+      <Transition to="Finalize"/>
+    </Step>
 
-	<Step icon="Task" name="Provision" posX="250" posY="50">
-	    <Arg name="fallbackApprover" value="ref:fallbackApprover"/>
-	    <Arg name="formTemplate" value="Identity Update"/>
-	    <Arg name="identityDisplayName" value="ref:identityDisplayName"/>
-	    <Arg name="identityName" value="ref:identityName"/>
-	    <Arg name="launcher" value="ref:launcher"/>
-	    <Arg name="manualActionsEmailTemplate" value="Pending Manual Change"/>
-	    <Arg name="project" value="ref:project"/>
-	    <Arg name="policyScheme" value="none"/>
-	    <Arg name="trace" value="ref:trace"/>
-	    <Return name="project" to="project"/>
-	    <WorkflowRef>
-	      <Reference class="sailpoint.object.Workflow" name="Identity Request Provision"/>
-	    </WorkflowRef>
-	    <Transition to="Finalize"/>
-	</Step>
+    <Step catches="complete" icon="Task" name="Finalize" posX="900" posY="50">
+      <Arg name="approvalSet" value="ref:cart"/>
+      <Arg name="project" value="ref:project"/>
+      <Arg name="trace" value="ref:trace"/>
+      <WorkflowRef>
+        <Reference class="sailpoint.object.Workflow" name="Identity Request Finalize"/>
+      </WorkflowRef>
+      <Transition to="Refresh Identity"/>
+    </Step>
 
-	<Step catches="complete" icon="Task" name="Finalize" posX="300" posY="50">
-		<Arg name="approvalSet" value="ref:cart"/>
-		<Arg name="project" value="ref:project"/>
-		<Arg name="trace" value="ref:trace"/>
-		<WorkflowRef>
-			<Reference class="sailpoint.object.Workflow" name="Identity Request Finalize"/>
-		</WorkflowRef>
-		<Transition to="Refresh Identity"/>
-	</Step>
-
-	<Step icon="Task" action="call:refreshIdentity" name="Refresh Identity" posX="350" posY="50">
-		<Arg name="identityName" value="ref:identityName"/>
-		<Arg name="correlateEntitlements" value="string:true"/>
-		<Arg name="provision" value="string:true"/>
-		<Transition to="end"/>
-	</Step>
+    <Step icon="Task" action="call:refreshIdentity" name="Refresh Identity" posX="215" posY="250">
+    <Arg name="identityName" value="ref:identityName"/>
+    <Arg name="correlateEntitlements" value="string:true"/>
+    <Arg name="provision" value="string:true"/>
+    <Transition to="end"/>
+  </Step>
 
     <Step icon="Stop" name="end" posX="400" posY="50"/>
   </Workflow>
 </sailpoint>
-
