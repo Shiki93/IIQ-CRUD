@@ -93,7 +93,7 @@
     </Step>
 
     <Step icon="Message" name="Display Form" posX="100" posY="50">
-      <Approval owner="ref:manager" send='identityName'>
+      <Approval owner="spadmin" send='identityName'>
         <Arg name='workItemDescription' value='Process change user: $(identityName)'/>
         <Arg name="workItemRequester" value="ref:identityName"/>
         <Arg name="workItemNotificationTemplate" value="MoverEmployeeManager"/>
@@ -160,18 +160,17 @@
           ProvisioningPlan plan = new ProvisioningPlan();
           List accreqs = new ArrayList();
 
-          String manFirst = context.getObjectById(Identity.class,manager).getFirstname();
-          String manLast = context.getObjectById(Identity.class,manager).getLastname();
-
           AccountRequest acctReq = new AccountRequest();
           acctReq.setOperation(AccountRequest.Operation.Modify);
           acctReq.setApplication("AD Connector");
           acctReq.add(new AttributeRequest("sAMAccountName",identityName));
-          String ma = "CN=" + manFirst + " " + manLast + ",​CN=Users,​DC=ad_training,​DC=net";
+          String manFirst = context.getObjectById(Identity.class,manager).getFirstname();
+          String manLast = context.getObjectById(Identity.class,manager).getLastname();
+          String ma = "CN=" + manFirst + " " + manLast + ",CN=Users,DC=ad_training,DC=net";
           acctReq.add(new AttributeRequest("manager",ma));
           acctReq.add(new AttributeRequest("mail",newEmail));
           acctReq.add(new AttributeRequest("department",newDepartment));
-          acctReq.setNativeIdentity("CN=" + identityFirstName + " " + identityLastName + ",​CN=Users,​DC=ad_training,​DC=net");
+          acctReq.setNativeIdentity("CN=" + identityFirstName + " " + identityLastName +  ",CN=Users,DC=ad_training,DC=net");
           accreqs.add(acctReq);
 
           plan.setAccountRequests(accreqs);
