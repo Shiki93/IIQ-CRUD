@@ -125,7 +125,7 @@
             <Field displayName="Email" name="mail" type="String" value="$(identityEmail)" required="true"/>
 
 
-            <Field displayName="Manager" filterString="managerStatus == true" name="manager" type="sailpoint.object.Identity" value="$(managerIdentity)"/>
+            <Field displayName="Manager" filterString='managerStatus == true AND application.equals("AD Connector")' name="manager" type="sailpoint.object.Identity" value="$(managerIdentity)"/>
 
 
             <Field displayName="Department" name="department" type="String" value="$(identityDepartment)"/>
