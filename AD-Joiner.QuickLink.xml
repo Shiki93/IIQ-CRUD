@@ -1,11 +1,39 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <!DOCTYPE QuickLink PUBLIC "sailpoint.dtd" "sailpoint.dtd">
-<QuickLink action="workflow" category="Custom" messageKey="Joiner Workflow" name="Joiner">
+<QuickLink name="Joiner" action="workflow" enabled="true" messageKey="Joiner Workflow" category="Custom">
   <Attributes>
     <Map>
-      <entry key="launcher"/>
-      <entry key="workflowName" value="Joiner"/>
-      <entry key="workflowSuccess" value="Starting request..."/>
+      <entry key="workflowName" value="Joiner" />
+      <entry key="workflowSuccess" value="Create process started..." />
+      <entry key="manager">
+        <value>
+          <Script>
+            <Source>
+              if(currentUser.getManager() == null){
+                return "spadmin";
+              }
+              else{
+                return currentUser.getManager().getName();
+              }
+            </Source>
+          </Script>
+        </value>
+      </entry>
+
+      <entry key="managerEmail">
+        <value>
+          <Script>
+            <Source>
+              if(currentUser.getManager() == null){
+                return "spadmin@example.com";
+              }
+              else{
+                return currentUser.getManager().getEmail();
+              }
+            </Source>
+          </Script>
+        </value>
+      </entry>
     </Map>
   </Attributes>
 </QuickLink>
