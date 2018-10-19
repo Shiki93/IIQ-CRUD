@@ -125,7 +125,12 @@
             <Field displayName="Email" name="mail" type="String" value="$(identityEmail)" required="true"/>
 
 
+<<<<<<< HEAD
             <Field displayName="Manager" filterString='managerStatus == true &amp;&amp; links.application.name == "AD Connector"' name="manager" type="String" value="$(managerIdentity)"/>
+=======
+            <Field displayName="Manager" filterString='managerStatus == true &amp;&amp; links.application.name == "AD Connector"' name="manager" type="sailpoint.object.Identity" value="$(managerIdentity)"/>
+
+>>>>>>> master
 
             <Field displayName="Department" name="department" type="String" value="$(identityDepartment)"/>
 
