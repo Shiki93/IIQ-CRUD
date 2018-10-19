@@ -78,6 +78,7 @@
     <Variable name="cart" output="true"/>
     <Variable name="newEmail"/>
     <Variable name="newDepartment"/>
+    <Variable name="confPass"/>
 
 
     <Variable input="true" name="identityObject" initializer="script:context.getObjectByName(Identity.class,identityName);"/>
@@ -116,7 +117,21 @@
             <Field displayName="Login Name" name="sAMAccountName" value="$(identityName)" required="true"/>
 
             <Field displayName="Password" name="password" reviewRequired="true" type="secret" required="true" value=""/>
-            <Field displayName="Password Confirmation" name="passwordConfirm" reviewRequired="true" type="secret" required="true" value=""/>
+            <Field displayName="Password Confirmation" name="confPass" reviewRequired="true" type="secret" required="true" value="">
+              <ValidationScript>
+                <Source>
+
+                  String pw = password;
+                  String cPw = confPass;
+                  if((pw == null &amp;&amp; cPw != null) || (pw != null &amp;&amp; cPw == null) || (pw != null &amp;&amp; !pw.equals(cPw))){
+                    return "Error, password does not match";
+                  }
+                  else{
+                    return null;
+                  }
+                </Source>
+              </ValidationScript>
+            </Field>
           </Section>
 
           <Section type="datable" label="Account Details">

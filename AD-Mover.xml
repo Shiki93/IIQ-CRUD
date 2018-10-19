@@ -124,7 +124,7 @@
                   String pw = password;
                   String cPw = confPass;
                   if((pw == null &amp;&amp; cPw != null) || (pw != null &amp;&amp; cPw == null) || (pw != null &amp;&amp; !pw.equals(cPw))){
-                    return "Error, la contraseña debe coincidir";
+                    return "Error, password does not match";
                   }
                   else{
                     return null;
