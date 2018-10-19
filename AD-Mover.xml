@@ -125,8 +125,7 @@
             <Field displayName="Email" name="mail" type="String" value="$(identityEmail)" required="true"/>
 
 
-            <Field displayName="Manager" filterString='managerStatus == true AND application.equals("AD Connector")' name="manager" type="sailpoint.object.Identity" value="$(managerIdentity)"/>
-
+            <Field displayName="Manager" filterString='managerStatus == true &amp;&amp; links.application.name == "AD Connector"' name="manager" type="String" value="$(managerIdentity)"/>
 
             <Field displayName="Department" name="department" type="String" value="$(identityDepartment)"/>
 
@@ -234,11 +233,11 @@
     </Step>
 
     <Step icon="Task" action="call:refreshIdentity" name="Refresh Identity" posX="215" posY="250">
-    <Arg name="identityName" value="ref:identityName"/>
-    <Arg name="correlateEntitlements" value="string:true"/>
-    <Arg name="provision" value="string:true"/>
-    <Transition to="end"/>
-  </Step>
+      <Arg name="identityName" value="ref:identityName"/>
+      <Arg name="correlateEntitlements" value="string:true"/>
+      <Arg name="provision" value="string:true"/>
+      <Transition to="end"/>
+    </Step>
 
     <Step icon="Stop" name="end" posX="400" posY="50"/>
   </Workflow>
