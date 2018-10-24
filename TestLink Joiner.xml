@@ -1,0 +1,209 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+	<ImportAction name="merge">
+		<Configuration name="SystemConfiguration">
+			<Attributes>
+				<Map>
+					<entry key="managerQuickLinks">
+						<value>
+							<List>
+								<QuickLink name="TestLink Joiner" action="workflow" enabled="true" messageKey="TestLink Joiner" category="Custom">
+									<Attributes>
+										<Map>
+											<entry key="workflowName" value="TestLink Joiner"/>
+											<entry key="workflowSuccess" value="Process started..."/>
+											<entry key="manager"/>
+										</Map>
+									</Attributes>
+								</QuickLink>
+							</List>
+						</value>
+					</entry>
+				</Map>
+			</Attributes>
+		</Configuration>
+	</ImportAction>
+
+	<Workflow explicitTransitions="true" libraries="Identity" name="TestLink Joiner" type="LCM">
+
+		<!-- Input Variables -->
+		<Variable input="true" name="launcher"/>
+		<Variable input="true" name="currentUserName"/>
+		<Variable input="true" name="quickLinkIdentityId"/>
+		<Variable input="true" initializer="string:true" name="trace"/>
+
+		<Variable name="identityName" initializer="script:context.getObjectById(Identity.class,quickLinkIdentityId).getName();"/>
+		<Variable input="true" name="identityObject" initializer="script:context.getObjectByName(Identity.class,identityName);"/>
+		<Variable input="true" name="identityDisplayName" initializer="script:(identityDisplayName != void) ? identityDisplayName : resolveDisplayName(identityName);"/>
+		<Variable input="true" name="identityPass" initializer="script:identityObject.getPassword();"/>
+		<Variable input="true" name="identityEmail" initializer="script:identityObject.getEmail();"/>
+		<Variable input="true" name="identityFirstName" initializer="script:identityObject.getFirstname();"/>
+		<Variable input="true" name="identityLastName" initializer="script:identityObject.getLastname();"/>
+		<Variable input="true" name="flow" initializer="AccountsRequest"/>
+		<Variable input="true" name="fallbackApprover" initializer="spadmin"/> <!-- Cambiar por manager -->
+		<Variable input="true" name="source" initializer="LCM"/>
+
+		<!-- Internal Variables -->
+		<Variable name="plan"/>
+		<Variable name="project"/>
+		<Variable name="newEmail"/>
+		<Variable name="identityRequestId" output="true"/>
+		<Variable name="cart" output="true"/>
+		<Variable name="optimisticProvisioning" initializer="false" editable="true"/>
+		<Variable name="foregroundProvisioning" initializer="true" editable="true"/>
+
+		<Step icon="Start" name="Start" posX="50" posY="50">
+			<Transition to="Display Form"/>
+		</Step>
+
+		<Step icon="Message" name="Display Form" posX="100" posY="50">
+			<Approval owner="spadmin" send="identityName">
+				<Arg name="workItemDescription" value="Create new user in TestLink for $(identityName)"/>
+				<Arg name="workItemRequester" value="ref:identityName"/>
+				<Arg name="workItemNotificationTemplate" value="JoinerEmployeeManager"/>
+				<Arg name="workItemType" value="ManualAction"/>
+
+				<Arg name="identityPass" value="ref:identityPass"/>
+				<Arg name="identityFirstName" value="ref:identityFirstName"/>
+				<Arg name="identityLastName" value="ref:identityLastName"/>
+				<Arg name="identityEmail" value="ref:identityEmail"/>
+				<Arg name="identityDisplayName" value="ref:identityDisplayName"/>
+
+				<Form name="CreateUser">
+					<Section name="CreateUser" type="text" label="Instructions">
+						<Field name="Directions" value="Create new user in TestLink for $(identityName)"/>
+					</Section>
+
+					<Section type="datable" label="Login Information">
+						<Field displayName="Login Name" name="sAMAccountName" value="$(identityName)" required="true"/>
+						<Field displayName="Password" name="password" reviewRequired="true" type="secret" required="true" value=""/>
+						<Field displayName="Password Confirmation" name="confPass" reviewRequired="true" type="secret" required="true" value="">
+							<ValidationScript>
+								<Source>
+									String pw = password;
+									String cPw = confPass;
+									if((pw == null &amp;&amp; cPw != null) || (pw != null &amp;&amp; cPw == null) || (pw != null &amp;&amp; !pw.equals(cPw))){
+										return "Error, password does not match";
+									}
+									else{
+										return null;
+									}
+								</Source>
+							</ValidationScript>
+						</Field>
+					</Section>
+
+					<Section type="datable" label="Account Details">
+						<Field displayName="First Name" name="firstName" type="String" value="$(identityFirstName)"/>
+						<Field displayName="Last Name" name="lastName" type="String" value="$(identityLastName)"/>
+						<Field displayName="Email" name="email" type="String" value="$(identityEmail)" required="true"/>
+					</Section>
+
+					<Button label="Submit" action="next"/>
+					<Button label="Cancel" action="cancel"/>
+				</Form>
+
+				<Return name="sAMAccountName" to="identityName"/>
+				<Return name="password" to="identityPass"/>
+				<Return name="firstName" to="identityFirstName"/>
+				<Return name="lastName" to="identityLastName"/>
+				<Return name="email" to="newEmail"/>
+			</Approval>
+			<Transition to="Create Plan"/>
+		</Step>
+
+		<Step icon="Task" name="Create Plan" resultVariable="plan" posX="150" posY="50">
+			<Script>
+				<Source>
+					import sailpoint.object.*;
+					import java.util.List;
+					import java.util.ArrayList;
+					import java.util.UUID;
+
+					ProvisioningPlan plan = new ProvisioningPlan();
+					List accreqs = new ArrayList();
+					UUID uuid = UUID.randomUUID();
+
+					AccountRequest acctReq = new AccountRequest();
+					acctReq.setOperation(AccountRequest.Operation.Create);
+					acctReq.setApplication("TestLink Connector");
+
+					acctReq.add(new AttributeRequest("login", identityName));
+					acctReq.add(new AttributeRequest("password", identityPass));
+					acctReq.add(new AttributeRequest("email", newEmail));
+					acctReq.add(new AttributeRequest("first", identityFirstName));
+					acctReq.add(new AttributeRequest("last", identityLastName));
+					acctReq.add(new AttributeRequest("cookie_string", uuid.toString()));
+
+					accreqs.add(acctReq);
+
+					plan.setAccountRequests(accreqs);
+					plan.setIdentity(identityObject);
+					return plan;
+				</Source>
+			</Script>
+			<Transition to="Initialize"/>
+		</Step>
+
+		<Step icon="Task" name="Initialize" posX="200" posY="50">
+			<Arg name="formTemplate" value="Identity Create"/>
+			<Arg name="identityName" value="ref:identityName"/>
+			<Arg name="identityDisplayName" value="ref:identityDisplayName"/>
+			<Arg name="launcher" value="ref:launcher"/>
+			<Arg name="optimisticProvisioning" value="ref:optimisticProvisioning"/>
+			<Arg name="plan" value="ref:plan"/>
+			<Arg name="priority" value="ref:workItemPriority"/>
+			<Arg name="policyScheme" value="none"/>
+			<Arg name="source" value="ref:source"/>
+			<Arg name="trace" value="ref:trace"/>
+			<Arg name="flow" value="ref:flow"/>
+			<Return name="project" to="project"/>
+			<Return name="approvalSet" to="cart"/>
+			<Return name="identityRequestId" to="identityRequestId"/>
+			<Return name="policyViolations" to="policyViolations"/>
+			<WorkflowRef>
+				<Reference class="sailpoint.object.Workflow" name="Identity Request Initialize"/>
+			</WorkflowRef>
+			<Transition to="Provision"/>
+		</Step>
+
+		<Step icon="Task" name="Provision" posX="250" posY="50">
+			<Arg name="fallbackApprover" value="ref:fallbackApprover"/>
+			<Arg name="foregroundProvisioning" value="ref:foregroundProvisioning"/>
+			<Arg name="formTemplate" value="Identity Create"/>
+			<Arg name="identityDisplayName" value="ref:identityDisplayName"/>
+			<Arg name="identityName" value="ref:identityName"/>
+			<Arg name="launcher" value="ref:launcher"/>
+			<Arg name="manualActionsEmailTemplate" value="Pending Manual Change"/>
+			<Arg name="optimisticProvisioning" value="ref:optimisticProvisioning"/>
+			<Arg name="project" value="ref:project"/>
+			<Arg name="policyScheme" value="none"/>
+			<Arg name="trace" value="ref:trace"/>
+			<Return name="project" to="project"/>
+			<WorkflowRef>
+				<Reference class="sailpoint.object.Workflow" name="Identity Request Provision"/>
+			</WorkflowRef>
+			<Transition to="Finalize"/>
+		</Step>
+
+		<Step catches="complete" icon="Task" name="Finalize" posX="300" posY="50">
+			<Arg name="approvalSet" value="ref:cart"/>
+			<Arg name="project" value="ref:project"/>
+			<Arg name="trace" value="ref:trace"/>
+			<WorkflowRef>
+				<Reference class="sailpoint.object.Workflow" name="Identity Request Finalize"/>
+			</WorkflowRef>
+			<Transition to="Refresh Identity"/>
+		</Step>
+
+		<Step icon="Task" action="call:refreshIdentity" name="Refresh Identity" posX="350" posY="50">
+			<Arg name="identityName" value="ref:identityName"/>
+			<Arg name="correlateEntitlements" value="string:true"/>
+			<Arg name="provision" value="string:true"/>
+			<Transition to="end"/>
+		</Step>
+
+		<Step icon="Stop" name="end" posX="400" posY="50"/>
+	</Workflow>
+</sailpoint>
