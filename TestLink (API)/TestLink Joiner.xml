@@ -116,7 +116,7 @@
     <Step icon="Task" name="Create Plan" resultVariable="plan" posX="150" posY="50">
       <Script>
         <Source>
-          import java.io.BufferedReader;
+            import java.io.BufferedReader;
             import java.io.IOException;
             import java.io.InputStreamReader;
             import java.net.HttpURLConnection;
@@ -126,11 +126,20 @@
             import java.util.logging.Level;
             import java.util.logging.Logger;
             import java.util.UUID;
+            import java.security.*;
+            import java.math.BigInteger;
 
             UUID uuid = UUID.randomUUID();
 
+
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            byte[] messageDigest = md.digest(identityPass.getBytes());
+            BigInteger number = new BigInteger(1, messageDigest);
+            String clave = number.toString(16);
+
+
             try {
-                  URL url = new URL("http://172.16.48.9  estlink_api/API/PUT.php?login=" + identityName + "&amp;password=" + identityPass + "&amp;email=" + newEmail +"&amp;first=" + identityFirstName + "&amp;last=" + identityLastName + "&amp;cookie_string=" + uuid);
+                  URL url = new URL("http://172.16.48.9/testlink_api/API/PUT.php?login=" + identityName + "&amp;password=" + clave + "&amp;email=" + newEmail +"&amp;first=" + identityFirstName + "&amp;last=" + identityLastName + "&amp;cookie_string=" + uuid);
                   HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                   conn.setRequestMethod("GET");
                   conn.setRequestProperty("Accept", "application/xml");
