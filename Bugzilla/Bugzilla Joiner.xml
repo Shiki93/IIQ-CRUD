@@ -8,7 +8,7 @@
           <entry key="managerQuickLinks">
             <value>
               <List>
-                <QuickLink name="Bugzilla Joiner" action="workflow" enabled="true" messageKey="Bugzilla Joiner" category="Custom">
+                <QuickLink name="Bugzilla Joiner" action="workflow" enabled="true" messageKey="Bugzilla Joiner" category="Bugzilla">
                   <Attributes>
                     <Map>
                       <entry key="workflowName" value="Bugzilla Joiner"/>

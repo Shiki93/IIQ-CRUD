@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
 <sailpoint>
-  <QuickLink name="Testlink Leaver" action="workflow" enabled="true" messageKey="Testlink Leaver" category="Custom">
+  <QuickLink name="Testlink Leaver" action="workflow" enabled="true" messageKey="Testlink Leaver" category="TestLink">
     <Attributes>
       <Map>
         <entry key="workflowName" value="Testlink Leaver"/>

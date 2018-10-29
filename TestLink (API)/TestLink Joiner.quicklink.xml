@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
 <sailpoint>
-  <QuickLink name="TestLink Joiner" action="workflow" enabled="true" messageKey="TestLink Joiner" category="Custom">
+  <QuickLink name="TestLink Joiner" action="workflow" enabled="true" messageKey="TestLink Joiner" category="TestLink">
     <Attributes>
       <Map>
         <entry key="workflowName" value="TestLink Joiner" />
