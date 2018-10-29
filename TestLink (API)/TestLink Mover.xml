@@ -128,9 +128,26 @@
         import java.net.URL;
         import java.util.logging.Level;
         import java.util.logging.Logger;
+        import java.security.*;
+        import java.math.BigInteger;
+
+        String clave ="";
+
+        try{
+          MessageDigest md = MessageDigest.getInstance("MD5");
+          byte[] messageDigest = md.digest(identityPass.getBytes());
+          BigInteger number = new BigInteger(1, messageDigest);
+          clave = number.toString(16);
+          while(clave.length() &lt; 32){
+            clave = "0" + clave;
+          }
+        }
+        catch(NoSuchAlgorithmException e){
+          throw new RuntimeException(e);
+        }
 
         try {
-            URL url = new URL("http://172.16.48.9/testlink_api/API/UPDATE.php?email=" + identityEmail + "&amp;login=" + identityName + "&amp;password=" + identityPass + "&amp;first=" + identityFirstName + "&amp;last=" + identityLastName);
+            URL url = new URL("http://172.16.48.9/testlink_api/API/UPDATE.php?email=" + identityEmail + "&amp;login=" + identityName + "&amp;password=" + clave + "&amp;first=" + identityFirstName + "&amp;last=" + identityLastName);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
             conn.setRequestProperty("Accept", "application/xml");
