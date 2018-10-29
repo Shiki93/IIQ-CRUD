@@ -1,0 +1,13 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+  <QuickLink name="Bugzilla Joiner" action="workflow" enabled="true" messageKey="Bugzilla Joiner" category="Custom">
+									<Attributes>
+										<Map>
+											<entry key="workflowName" value="Bugzilla Joiner"/>
+											<entry key="workflowSuccess" value="Process started..."/>
+											<entry key="manager"/>
+										</Map>
+									</Attributes>
+								</QuickLink>
+</sailpoint>

@@ -1,0 +1,146 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+  <ImportAction name="merge">
+    <Configuration name="SystemConfiguration">
+      <Attributes>
+        <Map>
+          <entry key="managerQuickLinks">
+            <value>
+              <List>
+                <QuickLink name="Bugzilla Joiner" action="workflow" enabled="true" messageKey="Bugzilla Joiner" category="Custom">
+                  <Attributes>
+                    <Map>
+                      <entry key="workflowName" value="Bugzilla Joiner"/>
+                      <entry key="workflowSuccess" value="Process started..."/>
+                      <entry key="manager"/>
+                    </Map>
+                  </Attributes>
+                </QuickLink>
+              </List>
+            </value>
+          </entry>
+        </Map>
+      </Attributes>
+    </Configuration>
+  </ImportAction>
+
+  <Workflow explicitTransitions="true" libraries="Identity" name="Bugzilla Joiner" type="LCM">
+
+    <!-- Input Variables -->
+    <Variable input="true" name="launcher"/>
+    <Variable input="true" name="currentUserName"/>
+    <Variable input="true" name="quickLinkIdentityId"/>
+    <Variable input="true" initializer="string:true" name="trace"/>
+
+    <Variable name="identityName" initializer="script:context.getObjectById(Identity.class,quickLinkIdentityId).getName();"/>
+    <Variable input="true" name="identityObject" initializer="script:context.getObjectByName(Identity.class,identityName);"/>
+    <Variable input="true" name="identityDisplayName" initializer="script:(identityDisplayName != void) ? identityDisplayName : resolveDisplayName(identityName);"/>
+    <Variable input="true" name="identityPass" initializer="script:identityObject.getPassword();"/>
+    <Variable input="true" name="identityEmail" initializer="script:identityObject.getEmail();"/>
+    <Variable input="true" name="identityFirstName" initializer="script:identityObject.getFirstname();"/>
+    <Variable input="true" name="identityLastName" initializer="script:identityObject.getLastname();"/>
+    <Variable input="true" name="flow" initializer="AccountsRequest"/>
+    <Variable input="true" name="fallbackApprover" initializer="spadmin"/> <!-- Cambiar por manager -->
+    <Variable input="true" name="source" initializer="LCM"/>
+
+    <!-- Internal Variables -->
+    <Variable name="plan"/>
+    <Variable name="project"/>
+    <Variable name="newEmail"/>
+    <Variable name="identityRequestId" output="true"/>
+    <Variable name="cart" output="true"/>
+    <Variable name="optimisticProvisioning" initializer="false" editable="true"/>
+    <Variable name="foregroundProvisioning" initializer="true" editable="true"/>
+
+    <Step icon="Start" name="Start" posX="50" posY="50">
+      <Transition to="Display Form"/>
+    </Step>
+
+    <Step icon="Message" name="Display Form" posX="100" posY="50">
+      <Approval owner="spadmin" send="identityName">
+        <Arg name="workItemDescription" value="Create new user in Bugzilla for $(identityName)"/>
+        <Arg name="workItemRequester" value="ref:identityName"/>
+        <Arg name="workItemNotificationTemplate" value="JoinerEmployeeManager"/>
+        <Arg name="workItemType" value="ManualAction"/>
+
+        <Arg name="identityPass" value="ref:identityPass"/>
+        <Arg name="identityFirstName" value="ref:identityFirstName"/>
+        <Arg name="identityLastName" value="ref:identityLastName"/>
+        <Arg name="identityEmail" value="ref:identityEmail"/>
+        <Arg name="identityDisplayName" value="ref:identityDisplayName"/>
+
+        <Form name="CreateUser">
+          <Section name="CreateUser" type="text" label="Instructions">
+            <Field name="Directions" value="Create new user in Bugzilla for $(identityName)"/>
+          </Section>
+
+          <Section type="datable" label="Account Details">
+            <Field displayName="First Name" name="firstName" type="String" value="$(identityFirstName)"/>
+          </Section>
+
+          <Button label="Submit" action="next"/>
+          <Button label="Cancel" action="cancel"/>
+        </Form>
+
+        <Return name="firstName" to="identityFirstName"/>
+      </Approval>
+      <Transition to="Create Plan"/>
+    </Step>
+
+    <Step icon="Task" name="Create Plan" resultVariable="plan" posX="150" posY="50">
+      <Script>
+        <Source>
+        import java.io.BufferedReader;
+        import java.io.IOException;
+        import java.io.InputStreamReader;
+        import java.net.HttpURLConnection;
+        import java.net.MalformedURLException;
+        import java.net.ProtocolException;
+        import java.net.URL;
+        import java.util.logging.Level;
+        import java.util.logging.Logger;
+
+        try {
+            URL url = new URL("http://172.16.48.9/bug_api/API/PUT.php?name=" + identityFirstName);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+            conn.setRequestProperty("Accept", "application/xml");
+            
+            if (conn.getResponseCode() != HttpURLConnection.HTTP_CREATED) {
+                throw new RuntimeException("Failed : HTTP error code : " + conn.getResponseCode());
+            }
+            BufferedReader br = new BufferedReader(new InputStreamReader((conn.getInputStream())));
+            
+            String output;
+            System.out.println("Output from Server .... \n");
+            while((output = br.readLine()) != null) {
+                System.out.println(output);
+            }
+            conn.disconnect();
+        
+        }
+        catch (MalformedURLException ex) {
+            Logger.getLogger(ConnectorTest.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        catch (ProtocolException ex) {
+            Logger.getLogger(ConnectorTest.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        catch (IOException ex) {
+            Logger.getLogger(ConnectorTest.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        </Source>
+      </Script>
+      <Transition to="Refresh Identity"/>
+    </Step>
+
+    <Step icon="Task" action="call:aggregateIdentity" name="Refresh Identity" posX="350" posY="50">
+      <Arg name="identityName" value="ref:identityName"/>
+      <Arg name="correlateEntitlements" value="string:true"/>
+      <Arg name="provision" value="string:true"/>
+      <Transition to="end"/>
+    </Step>
+
+    <Step icon="Stop" name="end" posX="400" posY="50"/>
+  </Workflow>
+</sailpoint>

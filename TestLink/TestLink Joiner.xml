@@ -116,85 +116,49 @@
 		<Step icon="Task" name="Create Plan" resultVariable="plan" posX="150" posY="50">
 			<Script>
 				<Source>
-					import sailpoint.object.*;
-					import java.util.List;
-					import java.util.ArrayList;
-					import java.util.UUID;
+					import java.io.BufferedReader;
+				    import java.io.IOException;
+				    import java.io.InputStreamReader;
+				    import java.net.HttpURLConnection;
+				    import java.net.MalformedURLException;
+				    import java.net.ProtocolException;
+				    import java.net.URL;
+				    import java.util.logging.Level;
+				    import java.util.logging.Logger;
+				    import java.util.UUID;
 
-					ProvisioningPlan plan = new ProvisioningPlan();
-					List accreqs = new ArrayList();
-					UUID uuid = UUID.randomUUID();
+				    UUID uuid = UUID.randomUUID();
 
-					AccountRequest acctReq = new AccountRequest();
-					acctReq.setOperation(AccountRequest.Operation.Create);
-					acctReq.setApplication("TestLink Connector");
-
-					acctReq.add(new AttributeRequest("login", identityName));
-					acctReq.add(new AttributeRequest("password", identityPass));
-					acctReq.add(new AttributeRequest("email", newEmail));
-					acctReq.add(new AttributeRequest("first", identityFirstName));
-					acctReq.add(new AttributeRequest("last", identityLastName));
-					acctReq.add(new AttributeRequest("cookie_string", uuid.toString()));
-
-					accreqs.add(acctReq);
-
-					plan.setAccountRequests(accreqs);
-					plan.setIdentity(identityObject);
-					return plan;
+				    try {
+			            URL url = new URL("http://172.16.48.9/testlink_api/API/PUT.php?login=" + identityName + "&amp;password=" + identityPass + "&amp;email=" + newEmail +"&amp;first=" + identityFirstName + "&amp;last=" + identityLastName + "&amp;cookie_string=" + uuid);
+			            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+			            conn.setRequestMethod("GET");
+			            conn.setRequestProperty("Accept", "application/xml");
+			            
+			            if (conn.getResponseCode() != HttpURLConnection.HTTP_CREATED) {
+			                throw new RuntimeException("Failed : HTTP error code : " + conn.getResponseCode());
+			            }
+			            BufferedReader br = new BufferedReader(new InputStreamReader((conn.getInputStream())));
+			            
+			            String output;
+			            System.out.println("Output from Server .... \n");
+			            while((output = br.readLine()) != null) {
+			                System.out.println(output);
+			            }
+			            conn.disconnect();
+			        }
+			        catch (MalformedURLException ex) {
+			            Logger.getLogger(ConnectorTest.class.getName()).log(Level.SEVERE, null, ex);
+			        }
+			        catch (ProtocolException ex) {
+			            Logger.getLogger(ConnectorTest.class.getName()).log(Level.SEVERE, null, ex);
+			        }
+			        catch (IOException ex) {
+			            Logger.getLogger(ConnectorTest.class.getName()).log(Level.SEVERE, null, ex);
+			        }
 				</Source>
 			</Script>
-			<Transition to="Initialize"/>
-		</Step>
-
-		<Step icon="Task" name="Initialize" posX="200" posY="50">
-			<Arg name="formTemplate" value="Identity Create"/>
-			<Arg name="identityName" value="ref:identityName"/>
-			<Arg name="identityDisplayName" value="ref:identityDisplayName"/>
-			<Arg name="launcher" value="ref:launcher"/>
-			<Arg name="optimisticProvisioning" value="ref:optimisticProvisioning"/>
-			<Arg name="plan" value="ref:plan"/>
-			<Arg name="priority" value="ref:workItemPriority"/>
-			<Arg name="policyScheme" value="none"/>
-			<Arg name="source" value="ref:source"/>
-			<Arg name="trace" value="ref:trace"/>
-			<Arg name="flow" value="ref:flow"/>
-			<Return name="project" to="project"/>
-			<Return name="approvalSet" to="cart"/>
-			<Return name="identityRequestId" to="identityRequestId"/>
-			<Return name="policyViolations" to="policyViolations"/>
-			<WorkflowRef>
-				<Reference class="sailpoint.object.Workflow" name="Identity Request Initialize"/>
-			</WorkflowRef>
-			<Transition to="Provision"/>
-		</Step>
-
-		<Step icon="Task" name="Provision" posX="250" posY="50">
-			<Arg name="fallbackApprover" value="ref:fallbackApprover"/>
-			<Arg name="foregroundProvisioning" value="ref:foregroundProvisioning"/>
-			<Arg name="formTemplate" value="Identity Create"/>
-			<Arg name="identityDisplayName" value="ref:identityDisplayName"/>
-			<Arg name="identityName" value="ref:identityName"/>
-			<Arg name="launcher" value="ref:launcher"/>
-			<Arg name="manualActionsEmailTemplate" value="Pending Manual Change"/>
-			<Arg name="optimisticProvisioning" value="ref:optimisticProvisioning"/>
-			<Arg name="project" value="ref:project"/>
-			<Arg name="policyScheme" value="none"/>
-			<Arg name="trace" value="ref:trace"/>
-			<Return name="project" to="project"/>
-			<WorkflowRef>
-				<Reference class="sailpoint.object.Workflow" name="Identity Request Provision"/>
-			</WorkflowRef>
-			<Transition to="Finalize"/>
-		</Step>
-
-		<Step catches="complete" icon="Task" name="Finalize" posX="300" posY="50">
-			<Arg name="approvalSet" value="ref:cart"/>
-			<Arg name="project" value="ref:project"/>
-			<Arg name="trace" value="ref:trace"/>
-			<WorkflowRef>
-				<Reference class="sailpoint.object.Workflow" name="Identity Request Finalize"/>
-			</WorkflowRef>
-			<Transition to="Refresh Identity"/>
+			<Transition to="end"/>
 		</Step>
 
 		<Step icon="Task" action="call:refreshIdentity" name="Refresh Identity" posX="350" posY="50">

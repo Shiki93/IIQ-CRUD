@@ -1,0 +1,41 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+  <QuickLink name="TestLink Joiner" action="workflow" enabled="true" messageKey="TestLink Joiner" category="Custom">
+    <Attributes>
+      <Map>
+        <entry key="workflowName" value="TestLink Joiner" />
+        <entry key="workflowSuccess" value="Create process started..." />
+        <entry key="manager">
+          <value>
+            <Script>
+              <Source>
+              if(currentUser.getManager() == null){
+                return "spadmin";
+              }
+              else{
+                return currentUser.getManager().getName();
+              }
+              </Source>
+            </Script>
+          </value>
+        </entry>
+
+        <entry key="managerEmail">
+          <value>
+            <Script>
+              <Source>
+              if(currentUser.getManager() == null){
+                return "spadmin@example.com";
+              }
+              else{
+                return currentUser.getManager().getEmail();
+              }
+              </Source>
+            </Script>
+          </value>
+        </entry>
+      </Map>
+    </Attributes>
+  </QuickLink>
+</sailpoint>
