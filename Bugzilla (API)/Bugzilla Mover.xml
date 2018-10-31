@@ -8,10 +8,10 @@
           <entry key="managerQuickLinks">
             <value>
               <List>
-                <QuickLink name="Bugzilla Joiner" action="workflow" enabled="true" messageKey="Bugzilla Joiner" category="Bugzilla">
+                <QuickLink name="Bugzilla Mover" action="workflow" enabled="true" messageKey="Bugzilla Mover" category="Bugzilla">
                   <Attributes>
                     <Map>
-                      <entry key="workflowName" value="Bugzilla Joiner"/>
+                      <entry key="workflowName" value="Bugzilla Mover"/>
                       <entry key="workflowSuccess" value="Process started..."/>
                       <entry key="manager"/>
                     </Map>
@@ -25,7 +25,7 @@
     </Configuration>
   </ImportAction>
 
-  <Workflow explicitTransitions="true" libraries="Identity" name="Bugzilla Joiner" type="LCM">
+  <Workflow explicitTransitions="true" libraries="Identity" name="Bugzilla Mover" type="LCM">
 
     <!-- Input Variables -->
     <Variable input="true" name="launcher"/>
@@ -72,7 +72,7 @@
 
         <Form name="CreateUser">
           <Section name="CreateUser" type="text" label="Instructions">
-            <Field name="Directions" value="Create new user in Bugzilla for $(identityName)"/>
+            <Field name="Directions" value="Update user in Bugzilla for $(identityName)"/>
           </Section>
 
           <Section type="datable" label="Account Details">
@@ -120,8 +120,8 @@
         import java.util.logging.Level;
         import java.util.logging.Logger;
 
-	try{
-            URL url = new URL("http://172.16.48.9/bug_api/API/PUT.php?login_name=" + identityEmail + "&amp;cryptpassword=" + identityPass + "&amp;realname=" + identityFirstName);
+        try{
+            URL url = new URL("http://172.16.48.9/bug_api/API/UPDATE.php?login_name=" + identityEmail + "&amp;cryptpassword=" + identityPass + "&amp;realname=" + identityFirstName);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
             conn.setRequestProperty("Accept", "application/xml");
