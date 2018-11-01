@@ -1,27 +1,25 @@
 <?php
 // read Users
 
-function create($db, $login, $password, $email, $first, $last, $cookie_string) {
+function create($db, $login, $password, $email, $first, $last, $cookie_string, $role_id) {
 
-    $query = "INSERT INTO users(login, password, email, first, last, cookie_string)" . 
+    $query = "INSERT INTO users(login, password, email, first, last, cookie_string, role_id)" . 
                " VALUES ('" . $login         . "', " .
                         "'" . $password      . "', " .
                         "'" . $email         . "', " .
                         "'" . $first         . "', " .
                         "'" . $last          . "', " .
-                        "'" . $cookie_string . "');";
+                        "'" . $cookie_string . "', " .
+                        " " . $role_id       . ");";
     $stmt = $db->prepare($query);
-
-    if ($stmt->execute()) {
-        return true;
-    }
-    return false;
+    $stmt->execute();
+    return true;
 }
 
-function read($db){
+function read($db, $where){
  
     // select all query
-    $query = "SELECT * FROM users;";
+    $query = "SELECT * FROM users" . $where . ";";
  
     // prepare query statement
     $stmt = $db->prepare($query);
@@ -32,7 +30,7 @@ function read($db){
     return $stmt;
 }
 
-function update($db, $key, $login, $password, $first, $last, $type) {
+function update($db, $key, $login, $password, $first, $last, $type, $role_id) {
     $limit = "";
     if ($type == "email")
         $limit = "'";
@@ -40,7 +38,8 @@ function update($db, $key, $login, $password, $first, $last, $type) {
     $query = "UPDATE users SET login = '"          . $login         . "', " .
                                "password = '"      . $password      . "', " .
                                "first = '"         . $first         . "', " .
-                               "last = '"          . $last          . "' "  .
+                               "last = '"          . $last          . "', " .
+                               "role_id = "        . $role_id       . " "   .
                "WHERE " . $type . " = " . $limit . $key . $limit . ";";
     $stmt = $db->prepare($query);
 

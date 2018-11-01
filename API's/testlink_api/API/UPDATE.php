@@ -32,14 +32,16 @@ $login         =    $_GET['login'];
 $password      =    $_GET['password'];
 $first         =    $_GET['first'];
 $last          =    $_GET['last'];
+$role_id 	   =    $_GET['role_id'];
 
 if (!empty($key)        &&
 	!empty($login)      &&
     !empty($password)   &&
 	!empty($first)      &&
-	!empty($last)      ) {
+	!empty($last)       &&
+	!empty($role_id)    ) {
 
-  if (update($db, $key, $login, $password, $first, $last, $type)) {
+  if (update($db, $key, $login, $password, $first, $last, $type, $role_id)) {
   	http_response_code(201);
   	echo json_encode(array("Message" => "User has been updated successful."));
   }
