@@ -24,14 +24,19 @@ $first         =    $_GET['first'];
 $last          =    $_GET['last'];
 $cookie_string =    $_GET['cookie_string'];
 
+$role_id = $users::role_GUEST;
+
+if (isset($_GET['role_id']))
+  $role_id = $_GET['role_id'];
+
 if (!empty($login)      &&
     !empty($password)   &&
     !empty($email)      &&
-	!empty($first)      &&
-	!empty($last)       &&
-	!empty($cookie_string) ) {
+	  !empty($first)      &&
+	  !empty($last)       &&
+	  !empty($cookie_string) ) {
 
-  if (create($db, $login, $password, $email, $first, $last, $cookie_string)) {
+  if (create($db, $login, $password, $email, $first, $last, $cookie_string, $role_id)) {
   	http_response_code(201);
   	echo json_encode(array("Message" => "User has been created successful."));
   }
