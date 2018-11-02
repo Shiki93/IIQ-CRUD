@@ -47,16 +47,82 @@
     <!-- Internal Variables -->
     <Variable name="plan"/>
     <Variable name="project"/>
+    <Variable name="uRights"/>
+    <Variable name="newRight"/>
     <Variable name="identityRequestId" output="true"/>
     <Variable name="cart" output="true"/>
     <Variable name="optimisticProvisioning" initializer="false" editable="true"/>
     <Variable name="foregroundProvisioning" initializer="true" editable="true"/>
 
     <Step icon="Start" name="Start" posX="50" posY="50">
+      <Transition to="Get Info"/>
+    </Step>
+
+    <Step icon="Task" name="Get Info" resultVariable="uRights" posX="100" posY="50">
+      <Arg name="uRights" value="ref:uRights"/>
+      <Script>
+        <Source>
+          import java.io.BufferedReader;
+          import java.io.IOException;
+          import java.io.InputStreamReader;
+          import java.net.HttpURLConnection;
+          import java.net.MalformedURLException;
+          import java.net.ProtocolException;
+          import java.net.URL;
+          import java.util.logging.Level;
+          import java.util.logging.Logger;
+
+          try{
+            String uri = "http://172.16.48.9/testlink_api/API/GET.php?email=" + identityEmail;
+            URL url = new URL(uri);
+            HttpURLConnection conn = (HttpURLConnection)url.openConnection();
+            conn.setRequestMethod("GET");
+            conn.setRequestProperty("Accept", "application/xml");
+
+            if(conn.getResponseCode() != 200){
+                throw new RuntimeException("Failed : HTTP error code : " + conn.getResponseCode());
+            }
+            BufferedReader br = new BufferedReader(new InputStreamReader((conn.getInputStream())));
+            String output = br.readLine();
+            String[] data = output.split(",");
+            char s = '"';
+            String role_id = data[7].split(String.valueOf(s))[3];
+            if(role_id.equals("4")){
+              uRights = "Test Designer";
+            }
+            if(role_id.equals("5")){
+              uRights = "Guest";
+            }
+            if(role_id.equals("6")){
+              uRights = "Senior Tester";
+            }
+            if(role_id.equals("7")){
+              uRights = "Tester";
+            }
+            if(role_id.equals("8")){
+              uRights = "Administrator";
+            }
+            if(role_id.equals("9")){
+              uRights = "Leader";
+            }
+            conn.disconnect();
+            return uRights;
+          }
+          catch (MalformedURLException ex) {
+            Logger.getLogger(ConnectorTest.class.getName()).log(Level.SEVERE, null, ex);
+          }
+          catch (ProtocolException ex) {
+              Logger.getLogger(ConnectorTest.class.getName()).log(Level.SEVERE, null, ex);
+          }
+          catch (IOException ex) {
+              Logger.getLogger(ConnectorTest.class.getName()).log(Level.SEVERE, null, ex);
+          }
+        </Source>
+      </Script>
       <Transition to="Display Form"/>
     </Step>
 
-    <Step icon="Message" name="Display Form" posX="100" posY="50">
+    <Step icon="Message" name="Display Form" posX="150" posY="50">
       <Approval owner="spadmin" send="identityName">
         <Arg name="workItemDescription" value="Update info for $(identityName)"/>
         <Arg name="workItemRequester" value="ref:identityName"/>
@@ -70,6 +136,7 @@
         <Arg name="managerIdentity" value="ref:managerIdentity"/>
         <Arg name="identityDepartment" value="ref:identityDepartment"/>
         <Arg name="identityDisplayName" value="ref:identityDisplayName"/>
+        <Arg name="uRights" value="ref:uRights"/>
 
         <Form name="UserUpdate">
           <Section name='userUpdate' type='text' label='Instructions'>
@@ -100,7 +167,16 @@
           <Section type="datable" label="Account Details">
             <Field displayName="First Name" name="firstName" type="String" value="$(identityFirstName)"/>
             <Field displayName="Last Name" name="sn" type="String" value="$(identityLastName)"/>
-
+            <Field displayName="User Rights" name="rights" type="String" value="$(uRights)" required="true">
+              <AllowedValues>
+                <String>Administrator</String>
+                <String>Guest</String>
+                <String>Leader</String>
+                <String>Senior Tester</String>
+                <String>Tester</String>
+                <String>Test Designer</String>
+              </AllowedValues>
+            </Field>
           </Section>
 
           <Button label='Submit' action='next'/>
@@ -111,12 +187,13 @@
         <Return name="firstName"      to="identityFirstName"/>
         <Return name="sn"             to="identityLastName"/>
         <Return name="confPass"       to="confPass"/>
+        <Return name="rights"         to="uRights"/>
 
       </Approval>
       <Transition to="Create Plan"/>
     </Step>
 
-    <Step icon="Task" name="Create Plan" resultVariable="plan" posX="150" posY="50">
+    <Step icon="Task" name="Create Plan" posX="200" posY="50">
       <Script>
         <Source>
         import java.io.BufferedReader;
@@ -146,8 +223,29 @@
           throw new RuntimeException(e);
         }
 
+        int rightValue;
+
+        if(uRights.equals("Administrator")){
+          rightValue = 8;
+        }
+        if(uRights.equals("Guest")){
+          rightValue = 5;
+        }
+        if(uRights.equals("Test Designer")){
+          rightValue = 4;
+        }
+        if(uRights.equals("Senior Tester")){
+          rightValue = 6;
+        }
+        if(uRights.equals("Tester")){
+          rightValue = 7;
+        }
+        if(uRights.equals("Leader")){
+          rightValue = 9;
+        }
+
         try {
-            URL url = new URL("http://172.16.48.9/testlink_api/API/UPDATE.php?email=" + identityEmail + "&amp;login=" + identityName + "&amp;password=" + clave + "&amp;first=" + identityFirstName + "&amp;last=" + identityLastName);
+            URL url = new URL("http://172.16.48.9/testlink_api/API/UPDATE.php?email=" + identityEmail + "&amp;login=" + identityName + "&amp;password=" + clave + "&amp;first=" + identityFirstName + "&amp;last=" + identityLastName + "&amp;role_id=" + rightValue);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
             conn.setRequestProperty("Accept", "application/xml");
@@ -179,7 +277,7 @@
       <Transition to="Refresh Identity"/>
     </Step>
 
-    <Step icon="Task" action="call:aggregateIdentity" name="Refresh Identity" posX="200" posY="50">
+    <Step icon="Task" action="call:aggregateIdentity" name="Refresh Identity" posX="250" posY="50">
       <Arg name="identityName" value="ref:identityName"/>
       <Arg name="correlateEntitlements" value="string:true"/>
       <Arg name="provision" value="string:true"/>
