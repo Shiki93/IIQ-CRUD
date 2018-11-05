@@ -1,0 +1,164 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+  <ImportAction name="merge">
+    <Configuration name="SystemConfiguration">
+      <Attributes>
+        <Map>
+          <entry key="managerQuickLinks">
+            <value>
+              <List>
+                <QuickLink name="Jenkins Joiner" action="workflow" enabled="true" messageKey="Jenkins Joiner" category="Jenkins">
+                  <Attributes>
+                    <Map>
+                      <entry key="workflowName" value="Jenkins Joiner"/>
+                      <entry key="workflowSuccess" value="Process started..."/>
+                      <entry key="manager"/>
+                    </Map>
+                  </Attributes>
+                </QuickLink>
+              </List>
+            </value>
+          </entry>
+        </Map>
+      </Attributes>
+    </Configuration>
+  </ImportAction>
+
+  <Workflow explicitTransitions="true" libraries="Identity" name="Jenkins Joiner" type="LCM">
+     <!-- Input Variables -->
+    <Variable input="true" name="launcher"/>
+    <Variable input="true" name="currentUserName"/>
+    <Variable input="true" name="quickLinkIdentityId"/>
+    <Variable input="true" initializer="string:true" name="trace"/>
+
+    <Variable name="identityName" initializer="script:context.getObjectById(Identity.class,quickLinkIdentityId).getName();"/>
+    <Variable input="true" name="identityObject" initializer="script:context.getObjectByName(Identity.class,identityName);"/>
+    <Variable input="true" name="identityDisplayName" initializer="script:(identityDisplayName != void) ? identityDisplayName : resolveDisplayName(identityName);"/>
+    <Variable input="true" name="identityPass" initializer="script:identityObject.getPassword();"/>
+    <Variable input="true" name="identityEmail" initializer="script:identityObject.getEmail();"/>
+    <Variable input="true" name="identityFirstName" initializer="script:identityObject.getFirstname();"/>
+    <Variable input="true" name="identityLastName" initializer="script:identityObject.getLastname();"/>
+    <Variable input="true" name="flow" initializer="AccountsRequest"/>
+    <Variable input="true" name="fallbackApprover" initializer="spadmin"/> <!-- Cambiar por manager -->
+    <Variable input="true" name="source" initializer="LCM"/>
+
+    <!-- Internal Variables -->
+    <Variable name="plan"/>
+    <Variable name="project"/>
+    <Variable name="identityRequestId" output="true"/>
+    <Variable name="cart" output="true"/>
+    <Variable name="optimisticProvisioning" initializer="false" editable="true"/>
+    <Variable name="foregroundProvisioning" initializer="true" editable="true"/>
+
+    <Step icon="Start" name="Start" posX="50" posY="50">
+      <Transition to="Display Form"/>
+    </Step>
+
+    <Step icon="Message" name="Display Form" posX="150" posY="50">
+      <Approval owner="spadmin" send="identityName">
+        <Arg name="workItemDescription" value="Update info for $(identityName)"/>
+        <Arg name="workItemRequester" value="ref:identityName"/>
+        <Arg name="workItemNotificationTemplate" value="MoverEmployeeManager"/>
+        <Arg name="workItemType" value="ManualAction"/>
+
+        <Arg name="identityPass" value="ref:identityPass"/>
+        <Arg name="identityFirstName" value="ref:identityFirstName"/>
+        <Arg name="identityLastName" value="ref:identityLastName"/>
+        <Arg name="identityEmail" value="ref:identityEmail"/>
+        <Arg name="managerIdentity" value="ref:managerIdentity"/>
+        <Arg name="identityDepartment" value="ref:identityDepartment"/>
+        <Arg name="identityDisplayName" value="ref:identityDisplayName"/>
+
+        <Form name="UserJoiner">
+          <Section name='userJoiner' type='text' label='Instructions'>
+            <Field name='Directions' value='Create accounr in Jenkins to employee: $(identityName)'/>
+          </Section>
+
+          <Section type="datable" label="Login Information">
+            <Field displayName="Login Name" name="sAMAccountName" value="$(identityName)" required="true"/>
+
+            <Field displayName="Password" name="password" reviewRequired="true" type="secret" required="true" value="$(identityPass)"/>
+            <Field displayName="Password Confirmation" name="confPass" reviewRequired="true" type="secret" required="true" value="$(identityPass)">
+              <ValidationScript>
+                <Source>
+
+                  String pw = password;
+                  String cPw = confPass;
+                  if((pw == null &amp;&amp; cPw != null) || (pw != null &amp;&amp; cPw == null) || (pw != null &amp;&amp; !pw.equals(cPw))){
+                    return "Error, password does not match";
+                  }
+                  else{
+                    return null;
+                  }
+                </Source>
+              </ValidationScript>
+            </Field>
+          </Section>
+
+          <Section type="datable" label="Account Details">
+            <Field displayName="First Name" name="firstName" type="String" value="$(identityFirstName)"/>
+            <Field displayName="Last Name" name="sn" type="String" value="$(identityLastName)"/>
+          </Section>
+
+          <Button label='Submit' action='next'/>
+          <Button label='Cancel' action='cancel'/>
+        </Form>
+        <Return name="sAMAccountName" to="identityName"/>
+        <Return name="password"       to="identityPass"/>
+        <Return name="firstName"      to="identityFirstName"/>
+        <Return name="sn"             to="identityLastName"/>
+        <Return name="confPass"       to="confPass"/>
+
+      </Approval>
+      <Transition to="Create Plan"/>
+    </Step>
+
+    <Step icon="Task" name="Create Plan" posX="200" posY="50">
+      <Script>
+        <Source>
+          import java.io.BufferedReader;
+            import java.io.IOException;
+            import java.io.InputStreamReader;
+            import java.net.HttpURLConnection;
+            import java.net.MalformedURLException;
+            import java.net.ProtocolException;
+            import java.net.URL;
+            import java.util.logging.Level;
+            import java.util.logging.Logger;
+
+            try {
+                  URL url = new URL("http://172.16.48.9/jenkins_api/PUT.php?user=" + identityName + "&amp;pass=" + confPass);
+                  HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                  conn.setRequestMethod("GET");
+                  conn.setRequestProperty("Accept", "application/xml");
+                  
+                  if (conn.getResponseCode() != HttpURLConnection.HTTP_CREATED) {
+                      throw new RuntimeException("Failed : HTTP error code : " + conn.getResponseCode());
+                  }
+                  BufferedReader br = new BufferedReader(new InputStreamReader((conn.getInputStream())));
+                  
+                  String output;
+                  System.out.println("Output from Server .... \n");
+                  while((output = br.readLine()) != null) {
+                      System.out.println(output);
+                  }
+                  conn.disconnect();
+              }
+              catch (MalformedURLException ex) {
+                  Logger.getLogger(ConnectorTest.class.getName()).log(Level.SEVERE, null, ex);
+              }
+              catch (ProtocolException ex) {
+                  Logger.getLogger(ConnectorTest.class.getName()).log(Level.SEVERE, null, ex);
+              }
+              catch (IOException ex) {
+                  Logger.getLogger(ConnectorTest.class.getName()).log(Level.SEVERE, null, ex);
+              }
+        </Source>
+      </Script>
+      <Transition to="end"/>
+    </Step>
+
+    <Step icon="Stop" name="end" posX="250" posY="50"/>
+  </Workflow>
+</sailpoint>
