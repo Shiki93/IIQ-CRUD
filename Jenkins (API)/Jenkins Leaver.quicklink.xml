@@ -1,0 +1,13 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+  <QuickLink name="Jenkins Leaver" action="workflow" enabled="true" messageKey="Jenkins Leaver" category="Jenkins">
+    <Attributes>
+      <Map>
+        <entry key="workflowName" value="Jenkins Leaver"/>
+        <entry key="workflowSuccess" value="Process started..."/>
+        <entry key="manager"/>
+      </Map>
+    </Attributes>
+  </QuickLink>
+</sailpoint>

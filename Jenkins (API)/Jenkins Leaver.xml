@@ -1,0 +1,125 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+  <ImportAction name="merge">
+    <Configuration name="SystemConfiguration">
+      <Attributes>
+        <Map>
+          <entry key="managerQuickLinks">
+            <value>
+              <List>
+                <QuickLink name="Jenkins Leaver" action="workflow" enabled="true" messageKey="Jenkins Leaver" category="Jenkins">
+                  <Attributes>
+                    <Map>
+                      <entry key="workflowName" value="Jenkins Leaver"/>
+                      <entry key="workflowSuccess" value="Process started..."/>
+                      <entry key="manager"/>
+                    </Map>
+                  </Attributes>
+                </QuickLink>
+              </List>
+            </value>
+          </entry>
+        </Map>
+      </Attributes>
+    </Configuration>
+  </ImportAction>
+
+  <Workflow explicitTransitions="true" libraries="Identity" name="Jenkins Leaver" type="LCM">
+
+    <!-- Input Variables -->
+    <Variable input="true" name="launcher"/>
+    <Variable input="true" name="currentUserName"/>
+    <Variable input="true" name="quickLinkIdentityId"/>
+    <Variable input="true" initializer="string:true" name="trace"/>
+
+    <Variable name="identityName" initializer="script:context.getObjectById(Identity.class,quickLinkIdentityId).getName();"/>
+    <Variable name="identityEmail" initializer="script:context.getObjectById(Identity.class,quickLinkIdentityId).getEmail();"/>
+    <Variable input="true" name="flow" initializer="AccountsRequest"/>
+    <Variable input="true" name="fallbackApprover" initializer="spadmin"/> <!-- Cambiar por manager -->
+    <Variable input="true" name="source" initializer="LCM"/>
+
+    <!-- Internal Variables -->
+    <Variable name="plan"/>
+    <Variable name="project"/>
+    <Variable name="newEmail"/>
+    <Variable name="identityRequestId" output="true"/>
+    <Variable name="cart" output="true"/>
+    <Variable name="optimisticProvisioning" initializer="false" editable="true"/>
+    <Variable name="foregroundProvisioning" initializer="true" editable="true"/>
+
+    <Step icon="Start" name="Start" posX="50" posY="50">
+      <Transition to="Display Form"/>
+    </Step>
+
+    <Step icon="Message" name="Display Form" posX="100" posY="50">
+      <Approval owner="spadmin" send="identityName">
+        <Arg name="workItemDescription" value="Delete user in Jenkins for $(identityName)"/>
+        <Arg name="workItemRequester" value="ref:identityName"/>
+        <Arg name="workItemNotificationTemplate" value="JoinerEmployeeManager"/>
+        <Arg name="workItemType" value="ManualAction"/>
+
+        <Form name="CreateUser">
+          <Section name="CreateUser" type="text" label="Instructions">
+            <Field name="Directions" value="Are you sure to delete $(identityName) from Jenkins?"/>
+          </Section>
+
+          <Button label="Delete" action="next"/>
+          <Button label="Not delete" action="cancel"/>
+        </Form>
+
+      </Approval>
+      <Transition to="Create Plan" when="approved"/>
+      <Transition to="end"/>
+    </Step>
+
+    <Step icon="Task" name="Create Plan" resultVariable="plan" posX="150" posY="50">
+      <Script>
+        <Source>
+        import java.io.BufferedReader;
+        import java.io.IOException;
+        import java.io.InputStreamReader;
+        import java.net.HttpURLConnection;
+        import java.net.MalformedURLException;
+        import java.net.ProtocolException;
+        import java.net.URL;
+        import java.util.logging.Level;
+        import java.util.logging.Logger;
+
+	System.out.println("\nIdentityEmail: " + identityEmail + "\n");
+
+        try {
+            URL url = new URL("http://172.16.48.9/jenkins_api/DELETE.php?user=" + identityName);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+            conn.setRequestProperty("Accept", "application/xml");
+            
+            if (conn.getResponseCode() != HttpURLConnection.HTTP_CREATED) {
+                throw new RuntimeException("Failed : HTTP error code : " + conn.getResponseCode());
+            }
+            BufferedReader br = new BufferedReader(new InputStreamReader((conn.getInputStream())));
+            
+            String output;
+            System.out.println("Output from Server .... \n");
+            while((output = br.readLine()) != null) {
+                System.out.println(output);
+            }
+	    conn.disconnect();
+        }
+        catch (MalformedURLException ex) {
+            Logger.getLogger(ConnectorTest.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        catch (ProtocolException ex) {
+            Logger.getLogger(ConnectorTest.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        catch (IOException ex) {
+            Logger.getLogger(ConnectorTest.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        </Source>
+      </Script>
+      <Transition to="end"/>
+    </Step>
+
+    <Step icon="Stop" name="end" posX="400" posY="50"/>
+  </Workflow>
+</sailpoint>
